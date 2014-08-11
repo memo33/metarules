@@ -58,6 +58,14 @@ object Flag {
     val BlendRight: Flag = new NestedFlag(flipFlags.BlendLeft, revFlags.BlendRight, 13, _.BlendRight)
     val ExtBlendLeft: Flag = new NestedFlag(flipFlags.ExtBlendRight, revFlags.ExtBlendLeft, 111, _.ExtBlendLeft)
     val ExtBlendRight: Flag = new NestedFlag(flipFlags.ExtBlendLeft, revFlags.ExtBlendRight, 113, _.ExtBlendRight)
+    val FlexFly01L: Flag = new NestedFlag(flipFlags.FlexFly01R, revFlags.FlexFly01L, 211, _.FlexFly01L)
+    val FlexFly01R: Flag = new NestedFlag(flipFlags.FlexFly01L, revFlags.FlexFly01R, 213, _.FlexFly01R)
+    val FlexFly12L: Flag = new NestedFlag(flipFlags.FlexFly12R, revFlags.FlexFly12L, 221, _.FlexFly12L)
+    val FlexFly12R: Flag = new NestedFlag(flipFlags.FlexFly12L, revFlags.FlexFly12R, 223, _.FlexFly12R)
+    val FlexFly34L: Flag = new NestedFlag(flipFlags.FlexFly34R, revFlags.FlexFly34L, 231, _.FlexFly34L)
+    val FlexFly34R: Flag = new NestedFlag(flipFlags.FlexFly34L, revFlags.FlexFly34R, 233, _.FlexFly34R)
+    val FlexFly45L: Flag = new NestedFlag(flipFlags.FlexFly45R, revFlags.FlexFly45L, 241, _.FlexFly45L)
+    val FlexFly45R: Flag = new NestedFlag(flipFlags.FlexFly45L, revFlags.FlexFly45R, 243, _.FlexFly45R)
     // --- add new flags here ---
   }
 
@@ -98,6 +106,22 @@ object Flag {
     case 111 => Out.ExtBlendLeft
     case -113 => In.ExtBlendRight
     case 113 => Out.ExtBlendRight
+    case -211 => In.FlexFly01L
+    case 211 => Out.FlexFly01L
+    case -213 => In.FlexFly01R
+    case 213 => Out.FlexFly01R
+    case -221 => In.FlexFly12L
+    case 221 => Out.FlexFly12L
+    case -223 => In.FlexFly12R
+    case 223 => Out.FlexFly12R
+    case -231 => In.FlexFly34L
+    case 231 => Out.FlexFly34L
+    case -233 => In.FlexFly34R
+    case 233 => Out.FlexFly34R
+    case -241 => In.FlexFly45L
+    case 241 => Out.FlexFly45L
+    case -243 => In.FlexFly45R
+    case 243 => Out.FlexFly45R
     case _ => parseBiFlag(v)
   }
 }
