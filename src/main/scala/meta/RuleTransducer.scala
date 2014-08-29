@@ -1,7 +1,7 @@
 package meta
 
 import RotFlip._
-import Group.SymGroup.SymGroup
+import Group.SymGroup
 import Implicits._
 import Network._
 import Tile.{projectLeft, projectRight}

@@ -2,7 +2,6 @@ package meta
 
 import org.scalatest.{WordSpec, Matchers}
 import RotFlip._
-import scala.language.implicitConversions
 
 class GroupElementSpec extends WordSpec with Matchers {
 
@@ -50,8 +49,6 @@ class GroupElementSpec extends WordSpec with Matchers {
 
 class SymGroupSpec extends WordSpec with Matchers {
   import Group.SymGroup, SymGroup._
-
-  implicit def value2val(v: SymGroup.Value): SymGroup = v.asInstanceOf[SymGroup]
 
   "SymGroup" should {
     "have quotient group of correct order" in {

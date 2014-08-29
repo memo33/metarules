@@ -55,8 +55,8 @@ class NwmResolver extends IdResolver with NwmSingleSegResolver with DoubleSegRes
   /** is defined for all tiles that do not contain RHW, but NWM */
   def isDefinedAt(t: Tile): Boolean = !t.segs.exists(_.network.isRhw) && t.segs.exists(_.network.isNwm)
 
-  val leftHeadedMappedRepr: Group.QuotientGroup.QuotientGroup => Seq[RotFlip] = _.filter(!_.flipped)
-  val rightHeadedMappedRepr: Group.QuotientGroup.QuotientGroup => Seq[RotFlip] = _.filter(_.flipped)
+  val leftHeadedMappedRepr: Group.QuotientGroup => Seq[RotFlip] = _.filter(!_.flipped)
+  val rightHeadedMappedRepr: Group.QuotientGroup => Seq[RotFlip] = _.filter(_.flipped)
 
   def apply(tile: Tile): IdTile = {
     if (!isDefinedAt(tile)) {
