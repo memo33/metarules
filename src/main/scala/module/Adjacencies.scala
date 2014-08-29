@@ -1,6 +1,8 @@
 package module
 
 import meta._, Network._, Flags._, Implicits._
+import scala.collection.mutable
+import NetworkProperties._
 
 trait Adjacencies { this: RhwRuleGenerator =>
 
@@ -9,35 +11,68 @@ trait Adjacencies { this: RhwRuleGenerator =>
   private val SNNS = 2
   private val SNSN = 3
 
-  private val adjacentNetworksMap: Map[Network, Iterable[(Network, Int)]] = {
-    val m = scala.collection.mutable.Map.empty[Network, Iterable[(Network, Int)]]
+  /** Covers the multi-tile "inner" adjacencies */
+  private val multitileNetworks: Map[Network, Seq[(Network, Int)]] = {
+    val m = mutable.Map.empty[Network, Seq[(Network, Int)]]
     import RhwRuleGenerator.HeightLevel
+    // Rhw multi-tile networks
     for (h <- 0 to 2) {
-      val cMed = Iterable((h~Rhw6cm, NSNS))
+      val cMed = Seq((h~Rhw6cm, NSNS))
       val cShoulders = Seq(h~Rhw6c, h~Rhw8c, h~Rhw10c)
       for (shoulder <- cShoulders) {
         m(shoulder) = cMed
       }
-      val sMed = Iterable((h~Rhw8sm, NSNS))
+      val sMed = Seq((h~Rhw8sm, NSNS))
       val sShoulders = Seq(h~Rhw8s, h~Rhw10s, h~Rhw12s)
       for (shoulder <- sShoulders) {
         m(shoulder) = sMed
       }
-      m(h~Rhw6cm) = cShoulders map (n => (n, SNSN))
-      m(h~Rhw8sm) = sShoulders map (n => (n, SNSN))
+      m(h~Rhw6cm) = cShoulders map (n => n -> SNSN)
+      m(h~Rhw8sm) = sShoulders map (n => n -> SNSN)
     }
+    // Nwm multi-tile networks
+    m(Ave6) = Seq(Ave6m -> NSNS, Tla7m -> NSNS)
+    m(Ave8) = m(Ave6)
+    m(Ave6m) = Seq(Ave6 -> SNSN, Ave8 -> SNSN)
+    m(Tla7m) = m(Ave6m)
+    m(Tla5) = Seq(Tla5 -> NSSN)
+    m(Rd6) = Seq(Rd6 -> NSSN)
+    m(Owr5) = Seq(Owr4 -> NSSN)
+    // avelike networks are covered elsewhere because of the peculiar way shared diagonals work
     m.toMap
   }
 
-  private def adjacentNetworks(n: Network): TraversableOnce[(Network, Int)] = adjacentNetworksMap getOrElse (n, {
-    if (n == Ave6 || n == Ave8) Iterator((Ave6m, NSNS), (Tla7m, NSNS))
-    else if (n == Ave6m || n == Tla7m) Iterator((Ave6, SNSN), (Ave8, SNSN))
+  /** used as a cache */
+  private[this] val adjacentNetworksMap = mutable.Map.empty[Network, Seq[(Network, Int)]]
 
-    else if (n.typ == AvenueLike || n >= Tla5 && n <= Rd6) Iterator((n, NSSN))
+  private[this] def isRhw3(n: Network) = n == Rhw3 || n == L1Rhw3 || n == L2Rhw3
 
-    else if (n == Rhw4) Iterator((Rhw4, NSNS), (Rhw4, NSSN), (Rhw4, SNSN))
-
-    else Iterator.empty
+  /** Lists the networks that are supported adjacent to `n` including their
+    * directions (NSNS, NSSN, SNSN).
+    * TODO make sure that nothing is included twice, unnecessarily.
+    */
+  /*private*/ def adjacentNetworks(n: Network): TraversableOnce[(Network, Int)] = adjacentNetworksMap.getOrElseUpdate(n, {
+    val multAdjs = multitileNetworks.getOrElse(n, Seq.empty[(Network, Int)])
+    if (n.isRhw && !isRhw3(n)) {
+      val one = if (hasLeftShoulder(n)) {
+        RhwNetworks filter { m =>
+          !isRhw3(m) && hasRightShoulder(m) && (isSingleTile(n) || isSingleTile(m) || n.height == m.height)
+        } map (m => m -> NSNS)
+      } else Seq.empty
+      val two = if (hasRightShoulder(n)) {
+        RhwNetworks filter { m =>
+          !isRhw3(m) && hasLeftShoulder(m) && (isSingleTile(n) || isSingleTile(m) || n.height == m.height)
+        } map (m => m -> SNSN)
+      } else Seq.empty
+      val three = if (hasLeftShoulder(n) && n.typ != Symmetrical) {
+        RhwNetworks filter { m =>
+          !isRhw3(m) && hasLeftShoulder(m) && m.typ != Symmetrical && (isSingleTile(n) || isSingleTile(m) || n == m)
+        } map (m => m -> NSSN)
+      } else Seq.empty
+      multAdjs ++ one ++ two ++ three
+    } else {
+      multAdjs
+    }
   })
 
   /** Covers all cases of parallel adjacent +/X-intersections, i.e. OxO, OxD,
@@ -69,7 +104,7 @@ trait Adjacencies { this: RhwRuleGenerator =>
       }
       addRules(adjacent)
       for (adjBase <- adjacent.base) {
-        addRules(adjBase)
+        addRules(adjBase) // TODO add base only once!
       }
     }
     createRules()
