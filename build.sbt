@@ -21,3 +21,5 @@ def transduce(rule: Rule[Tile]): Unit = RuleTransducer(rule) foreach println
 """
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.5" % "test"
+
+libraryDependencies += "scalaenum" %% "scalaenum" % "0.1.2" from "https://dl.dropboxusercontent.com/s/gr947c7hs4u7xb9/scalaenum_2.11-0.1.2.jar"

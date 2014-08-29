@@ -4,7 +4,6 @@ import RotFlip._
 import Group._
 import SymGroup._
 import QuotientGroup._
-import Network.Network
 
 /* The content of this file makes the MetaRUL DSL syntax work. Changes in here
  * are unlikely to be necessary.
