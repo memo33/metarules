@@ -116,6 +116,12 @@ object Tile {
 case class IdTile(id: Int, rf: RotFlip, mappedRepr: QuotientGroup => Seq[RotFlip] = identity) extends TileLike {
   override def toString = f"0x$id%08X,${rf.rot},${rf.flip}"
   def * (rf: RotFlip) = copy(rf = this.rf * rf)
+
+  override def equals(any: Any): Boolean = any match {
+    case IdTile(id, rf, mr) => id == this.id && rf == this.rf
+    case _ => false
+  }
+  override def hashCode: Int = id ^ rf.hashCode
 }
 
 private[meta] class IdSymTile(symTile: SymTile, idTile: IdTile) extends SymTile {
