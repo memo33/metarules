@@ -47,8 +47,7 @@ object RotFlip extends scalaenum.Enum { // was previously called GroupElement
   val R2F1 = new RotFlip(2,1)
   val R1F1 = new RotFlip(1,1)
 
-  val elements = IndexedSeq(R0F0, R1F0, R2F0, R3F0, R0F1, R3F1, R2F1, R1F1)
-  private val elems = Array(R0F0, R1F0, R2F0, R3F0, R0F1, R1F1, R2F1, R3F1) // sic! different order to simplify 'withRotFlip'
+  private[this] val elems = Array(R0F0, R1F0, R2F0, R3F0, R0F1, R1F1, R2F1, R3F1) // sic! different order to simplify 'withRotFlip'
 
   private def withRotFlip(rot: Int, flip: Int): GroupElement = elems(rot + flip * 4)
 

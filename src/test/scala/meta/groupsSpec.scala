@@ -17,17 +17,17 @@ class GroupElementSpec extends WordSpec with Matchers {
       RotFlip(3,1) should be (R3F1)
     }
     "multiply associatively" in {
-      for (a <- elements; b <- elements; c <- elements) {
+      for (a <- values; b <- values; c <- values) {
         (a * b) * c should be (a * (b * c))
       }
     }
     "invert correctly" in {
-      for (a <- elements) {
+      for (a <- values) {
         a / a should be (R0F0)
       }
     }
     "have proper neutral element" in {
-      for (a <- elements) {
+      for (a <- values) {
         a * R0F0 should be (a)
         R0F0 * a should be (a)
       }
