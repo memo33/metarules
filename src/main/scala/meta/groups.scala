@@ -1,5 +1,6 @@
 package meta
 
+import scala.collection.immutable.SortedSet
 import RotFlip.GroupElement
 
 /** The eight rotations of a tile, e.g. in an override rule.
@@ -23,7 +24,7 @@ class RotFlip private (val rot: Int, val flip: Int) extends RotFlip.Val {
     RotFlip.withRotFlip(r, f)
   }
 
-  def ∈ (g: Seq[RotFlip]): Boolean = g.contains(this)
+  def ∈ (g: Set[RotFlip]): Boolean = g.contains(this)
 
   override def toString = "(" + rot + "," + flip + ")"
   def flipped: Boolean = flip != 0
@@ -57,14 +58,17 @@ object RotFlip extends scalaenum.Enum { // was previously called GroupElement
   }
 }
 
-sealed trait Group extends Seq[GroupElement] { this: Group.ValName =>
-  protected val rep: Seq[GroupElement]
-
-  def apply(idx: Int): GroupElement = rep(0)
-  def iterator: Iterator[GroupElement] = rep.iterator
-  def length: Int = rep.length
+sealed trait Group extends SortedSet[GroupElement] { this: Group.ValName =>
+  protected val rep: RotFlip.ValueSet
   override def stringPrefix = name
 
+  def iterator: Iterator[GroupElement] = rep.iterator
+  def -(elem: GroupElement): SortedSet[GroupElement] = rep - elem
+  def +(elem: GroupElement): SortedSet[GroupElement] = rep + elem
+  def contains(elem: GroupElement): Boolean = rep.contains(elem)
+  def keysIteratorFrom(start: GroupElement): Iterator[GroupElement] = rep.keysIteratorFrom(start)
+  implicit def ordering: Ordering[GroupElement] = rep.ordering
+  def rangeImpl(from: Option[GroupElement],until: Option[GroupElement]): SortedSet[GroupElement] = rep.rangeImpl(from, until)
 }
 
 object Group {
@@ -74,7 +78,7 @@ object Group {
     def name: String = super.toString
   }
 
-  class QuotientGroup private (protected val rep: Seq[GroupElement])
+  class QuotientGroup private (protected val rep: RotFlip.ValueSet)
     extends QuotientGroup.Val with ValName with Group
   object QuotientGroup extends scalaenum.Enum {
     import RotFlip._
@@ -82,7 +86,7 @@ object Group {
     type Value = QuotientGroup
 
     private def Val(r: Seq[Tuple2[Int, Int]]) =
-      new QuotientGroup(r.map(tup => RotFlip(tup._1, tup._2)))
+      new QuotientGroup(RotFlip.ValueSet(r.map(tup => RotFlip(tup._1, tup._2)): _*))
 
     val Cyc1  = Val(Seq((0,0)))
     val Cyc2A = Val(Seq((0,0), (1,0)))
@@ -94,7 +98,7 @@ object Group {
   }
 
   class SymGroup private (
-    protected val rep: Seq[GroupElement],
+    protected val rep: RotFlip.ValueSet,
     val quotient: QuotientGroup)
       extends SymGroup.Val with ValName with Group {
     import SymGroup._
@@ -116,7 +120,7 @@ object Group {
     type Value = SymGroup
 
     private def Val(r: Seq[Tuple2[Int, Int]], q: QuotientGroup) =
-      new SymGroup(r.map(tup => RotFlip(tup._1, tup._2)), q)
+      new SymGroup(RotFlip.ValueSet(r.map(tup => RotFlip(tup._1, tup._2)): _*), q)
 
     val Cyc1  = Val(Seq((0,0)), QuotientGroup.Dih4)
     val Cyc2A = Val(Seq((0,0), (2,0)), QuotientGroup.Dih2)
