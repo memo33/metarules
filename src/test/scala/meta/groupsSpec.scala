@@ -43,6 +43,32 @@ class GroupElementSpec extends WordSpec with Matchers {
       R2F1 * R2F1 should be (R0F0)
       R3F1 * R2F1 should be (R1F0)
       R1F1 * R1F1 should be (R0F0)
+      val multTable = Array(
+        Array(0,1,2,3,4,5,6,7),
+        Array(1,2,3,0,7,4,5,6),
+        Array(2,3,0,1,6,7,4,5),
+        Array(3,0,1,2,5,6,7,4),
+        Array(4,5,6,7,0,1,2,3),
+        Array(5,6,7,4,3,0,1,2),
+        Array(6,7,4,5,2,3,0,1),
+        Array(7,4,5,6,1,2,3,0))
+      for (a <- values; b <- values) {
+        (a * b).id should be (multTable(a.id)(b.id))
+      }
+    }
+    "divide correctly" in {
+      val divTable = Array(
+        Array(0,3,2,1,4,5,6,7),
+        Array(1,0,3,2,7,4,5,6),
+        Array(2,1,0,3,6,7,4,5),
+        Array(3,2,1,0,5,6,7,4),
+        Array(4,7,6,5,0,1,2,3),
+        Array(5,4,7,6,3,0,1,2),
+        Array(6,5,4,7,2,3,0,1),
+        Array(7,6,5,4,1,2,3,0))
+      for (a <- values; b <- values) {
+        (a / b).id should be (divTable(a.id)(b.id))
+      }
     }
   }
 }

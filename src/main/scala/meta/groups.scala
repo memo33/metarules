@@ -10,8 +10,8 @@ class RotFlip private (val rot: Int, val flip: Int) extends RotFlip.Val {
   /** Group multiplication from *left*, but written from *right*.
     */
   def * (that: GroupElement): GroupElement = {
-    val r = (this.rot + (if (this.flip == 1) -1 else 1) * that.rot) & 0x3
-    val f = if (this.flip != that.flip) 1 else 0
+    val f = this.flip ^ that.flip
+    val r = (this.rot + (this.flip * 2 + 1) * that.rot) & 0x3
     RotFlip.withRotFlip(r, f)
   }
 
@@ -19,8 +19,8 @@ class RotFlip private (val rot: Int, val flip: Int) extends RotFlip.Val {
     * with right operand inverted).
     */
   def / (that: GroupElement): GroupElement = {
-    val r = (this.rot + (if (this.flip != that.flip) 1 else -1) * that.rot) & 0x3
-    val f = if (this.flip != that.flip) 1 else 0
+    val f = this.flip ^ that.flip
+    val r = (this.rot + (f * 2 - 1) * that.rot) & 0x3
     RotFlip.withRotFlip(r, f)
   }
 
