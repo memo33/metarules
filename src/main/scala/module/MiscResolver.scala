@@ -9,7 +9,7 @@ class MiscResolver extends IdResolver {
     val map = scala.collection.mutable.Map.empty[Tile, IdTile]
     def add(tile: Tile, id: Int): Unit = {
       assert(!map.contains(tile))
-      for (rf <- RotFlip.elements) {
+      for (rf <- RotFlip.values) {
         val idTile = IdTile(id, rf)
         map.getOrElseUpdate(tile * rf, idTile)
       }

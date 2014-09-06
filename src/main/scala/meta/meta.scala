@@ -4,7 +4,6 @@ import RotFlip._
 import Group._
 import SymGroup._
 import QuotientGroup._
-import Network.Network
 
 /* The content of this file makes the MetaRUL DSL syntax work. Changes in here
  * are unlikely to be necessary.
@@ -113,7 +112,7 @@ object Tile {
   case object CopyTile
 }
 
-case class IdTile(id: Int, rf: RotFlip, mappedRepr: QuotientGroup => Seq[RotFlip] = identity) extends TileLike {
+case class IdTile(id: Int, rf: RotFlip, mappedRepr: QuotientGroup => Set[RotFlip] = identity) extends TileLike {
   override def toString = f"0x$id%08X,${rf.rot},${rf.flip}"
   def * (rf: RotFlip) = copy(rf = this.rf * rf)
 
@@ -128,7 +127,7 @@ private[meta] class IdSymTile(symTile: SymTile, idTile: IdTile) extends SymTile 
   def symmetries: SymGroup = symTile.symmetries
   def id: Int = idTile.id
   def rf: RotFlip = idTile.rf
-  def repr: Seq[RotFlip] = idTile.mappedRepr(symmetries.quotient)
+  def repr: Set[RotFlip] = idTile.mappedRepr(symmetries.quotient)
 }
 
 
