@@ -70,6 +70,8 @@ trait SingleSegResolver {
 
 trait RhwSingleSegResolver extends SingleSegResolver { this: RhwResolver =>
 
+  private[this] val stubSegment = Dirtroad~(0,0,0,0)
+
   def resolveSegment(seg: Segment): IdTile = {
     (if (isSingleTileRhw(seg.network)) singleProps else multiProps).get(seg.flags) match {
       case Some(prop) =>
@@ -83,7 +85,11 @@ trait RhwSingleSegResolver extends SingleSegResolver { this: RhwResolver =>
           id += offset
         }
         IdTile(id, prop.rf)
-      case None => ??? // TODO curves etc.
+      case None => if (seg == stubSegment) {
+        IdTile(0x57000F00, R0F0)
+      } else {
+        throw new UnsupportedOperationException(seg.toString) // ??? // TODO curves etc.
+      }
     }
   }
 }

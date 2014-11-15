@@ -2,12 +2,12 @@ package module
 
 import meta._, Network._, Flags._, Implicits._
 
-trait Adjacencies { this: RhwRuleGenerator =>
+object Adjacencies {
 
-  private val NSNS = 0
-  private val NSSN = 1
-  private val SNNS = 2
-  private val SNSN = 3
+  val NSNS = 0
+  val NSSN = 1
+  val SNNS = 2
+  val SNSN = 3
 
   private val adjacentNetworksMap: Map[Network, Iterable[(Network, Int)]] = {
     val m = scala.collection.mutable.Map.empty[Network, Iterable[(Network, Int)]]
@@ -29,7 +29,7 @@ trait Adjacencies { this: RhwRuleGenerator =>
     m.toMap
   }
 
-  private def adjacentNetworks(n: Network): TraversableOnce[(Network, Int)] = adjacentNetworksMap getOrElse (n, {
+  def adjacentNetworks(n: Network): TraversableOnce[(Network, Int)] = adjacentNetworksMap getOrElse (n, {
     if (n == Ave6 || n == Ave8) Iterator((Ave6m, NSNS), (Tla7m, NSNS))
     else if (n == Ave6m || n == Tla7m) Iterator((Ave6, SNSN), (Ave8, SNSN))
 
@@ -39,6 +39,11 @@ trait Adjacencies { this: RhwRuleGenerator =>
 
     else Iterator.empty
   })
+
+}
+
+trait Adjacencies { this: RhwRuleGenerator =>
+  import Adjacencies._
 
   /** Covers all cases of parallel adjacent +/X-intersections, i.e. OxO, OxD,
     * DxO, DxD, save for 'inner' diagonal intersections.

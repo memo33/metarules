@@ -15,9 +15,6 @@ object RhwRuleGenerator {
       m
     }
   }
-}
-
-class RhwRuleGenerator(val resolver: IdResolver) extends RuleGenerator with Curve45Generator with Adjacencies {
 
   private val nonRightShoulderNetworks: Set[Network] = {
     var set = Set.empty[Network]
@@ -26,14 +23,18 @@ class RhwRuleGenerator(val resolver: IdResolver) extends RuleGenerator with Curv
     set += (Ave6m, Tla7m)
     set
   }
-  private def hasRightShoulder(n: Network) = !nonRightShoulderNetworks(n)
+  def hasRightShoulder(n: Network) = !nonRightShoulderNetworks(n)
 
-  private def hasLeftShoulder(n: Network) = {
+  def hasLeftShoulder(n: Network) = {
     n.typ != AvenueLike &&
     !(n.typ == Symmetrical && !hasRightShoulder(n)) && // this is treated as right shoulder only, for efficiency
     !(n >= Rhw8s && n <= L2Rhw10c) &&
     !(n >= Tla5 && n <= Ave6m)
   }
+}
+
+class RhwRuleGenerator(val resolver: IdResolver) extends RuleGenerator with Curve45Generator with Adjacencies {
+  import RhwRuleGenerator._
 
   private def rhwIntersectionAllowed(rhw: Network, any: Network): Boolean = {
     if (!rhw.isRhw) {
@@ -71,7 +72,6 @@ class RhwRuleGenerator(val resolver: IdResolver) extends RuleGenerator with Curv
 //  private def isCNetwork(n: Network) = n >= Rhw6c && n <= L2Rhw10c || n == Ave6 || n == Ave8
 
   def createMultiTileStarters(): Unit = {
-    import RhwRuleGenerator.HeightLevel
     val g = 0 // ground level
     val heights = 0 to 2
     for (h <- heights) {
