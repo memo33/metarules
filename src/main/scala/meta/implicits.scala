@@ -1,15 +1,10 @@
 package meta
 
-import Group._, SymGroup.SymGroup, QuotientGroup.QuotientGroup
-
 /** Defines a number of implicit conversions most of which are needed to make
   * the MetaRUL syntax work.
   */
 object Implicits extends LowPriorityImplicits {
   import scala.language.implicitConversions
-//  implicit def groupElementValueToVal(v: GroupElement.Value): GroupElement.Val = v.asInstanceOf[GroupElement]
-  implicit def symGroupValueToVal(g: SymGroup.Value): SymGroup = g.asInstanceOf[SymGroup.Val]
-  implicit def quotientGroupValueToVal(g: QuotientGroup.Value): QuotientGroup = g.asInstanceOf[QuotientGroup.Val]
   implicit def segmentToTile(seg: Segment): Tile = Tile(Set(seg))
   implicit def tupleSegmentToTupleTile(ts: TupleSegment): TupleTile = TupleTile(ts.seg1, ts.seg2)
   implicit def tileToTupleTile(tile: Tile): TupleTile = TupleTile(tile, tile)

@@ -1,48 +1,53 @@
 package meta
 
+import scala.collection.immutable.SortedSet
+import RotFlip.GroupElement
+
 /** The eight rotations of a tile, e.g. in an override rule.
   */
-object RotFlip extends Enumeration { // was previously called GroupElement
+class RotFlip private (val rot: Int, val flip: Int) extends RotFlip.Val {
 
-  type RotFlip = Val
-  type GroupElement = Val
-  class Val private[RotFlip] (val rot: Int, val flip: Int) extends super.Val {
-
-    /** Group multiplication from *left*, but written from *right*.
-      */
-    def * (that: GroupElement): GroupElement = {
-      val r = (this.rot + (if (this.flip == 1) -1 else 1) * that.rot) & 0x3
-      val f = if (this.flip != that.flip) 1 else 0
-      withRotFlip(r, f)
-    }
-
-    /** Group division from *left*, but written from *right* (multiplication
-      * with right operand inverted).
-      */
-    def / (that: GroupElement): GroupElement = {
-      val r = (this.rot + (if (this.flip != that.flip) 1 else -1) * that.rot) & 0x3
-      val f = if (this.flip != that.flip) 1 else 0
-      withRotFlip(r, f)
-    }
-
-    def ∈ (g: Seq[RotFlip]): Boolean = g.contains(this)
-
-    override def toString = "(" + rot + "," + flip + ")"
-    def flipped: Boolean = flip != 0
-
+  /** Group multiplication from *left*, but written from *right*.
+    */
+  def * (that: GroupElement): GroupElement = {
+    val f = this.flip ^ that.flip
+    val r = (this.rot + (this.flip * 2 + 1) * that.rot) & 0x3
+    RotFlip.withRotFlip(r, f)
   }
 
-  val R0F0 = new Val(0,0)
-  val R1F0 = new Val(1,0)
-  val R2F0 = new Val(2,0)
-  val R3F0 = new Val(3,0)
-  val R0F1 = new Val(0,1)
-  val R3F1 = new Val(3,1)
-  val R2F1 = new Val(2,1)
-  val R1F1 = new Val(1,1)
+  /** Group division from *left*, but written from *right* (multiplication
+    * with right operand inverted).
+    */
+  def / (that: GroupElement): GroupElement = {
+    val f = this.flip ^ that.flip
+    val r = (this.rot + (f * 2 - 1) * that.rot) & 0x3
+    RotFlip.withRotFlip(r, f)
+  }
 
-  val elements = IndexedSeq(R0F0, R1F0, R2F0, R3F0, R0F1, R3F1, R2F1, R1F1)
-  private val elems = Array(R0F0, R1F0, R2F0, R3F0, R0F1, R1F1, R2F1, R3F1) // sic! different order to simplify 'withRotFlip'
+  def ∈ (g: Set[RotFlip]): Boolean = g.contains(this)
+
+  override def toString = "(" + rot + "," + flip + ")"
+  def flipped: Boolean = flip != 0
+
+}
+
+/** The eight rotations of a tile, e.g. in an override rule.
+  */
+object RotFlip extends scalaenum.Enum { // was previously called GroupElement
+
+  type Value = RotFlip
+  type GroupElement = RotFlip
+
+  val R0F0 = new RotFlip(0,0)
+  val R1F0 = new RotFlip(1,0)
+  val R2F0 = new RotFlip(2,0)
+  val R3F0 = new RotFlip(3,0)
+  val R0F1 = new RotFlip(0,1)
+  val R3F1 = new RotFlip(3,1)
+  val R2F1 = new RotFlip(2,1)
+  val R1F1 = new RotFlip(1,1)
+
+  private[this] val elems = Array(R0F0, R1F0, R2F0, R3F0, R0F1, R1F1, R2F1, R3F1) // sic! different order to simplify 'withRotFlip'
 
   private def withRotFlip(rot: Int, flip: Int): GroupElement = elems(rot + flip * 4)
 
@@ -52,16 +57,17 @@ object RotFlip extends Enumeration { // was previously called GroupElement
   }
 }
 
-import RotFlip.GroupElement
-
-sealed trait Group extends Seq[GroupElement] { this: Group.ValName =>
-  protected val rep: Seq[GroupElement]
-
-  def apply(idx: Int): GroupElement = rep(0)
-  def iterator: Iterator[GroupElement] = rep.iterator
-  def length: Int = rep.length
+sealed trait Group extends SortedSet[GroupElement] { this: Group.ValName =>
+  protected val rep: RotFlip.ValueSet
   override def stringPrefix = name
 
+  def iterator: Iterator[GroupElement] = rep.iterator
+  def -(elem: GroupElement): SortedSet[GroupElement] = rep - elem
+  def +(elem: GroupElement): SortedSet[GroupElement] = rep + elem
+  def contains(elem: GroupElement): Boolean = rep.contains(elem)
+  def keysIteratorFrom(start: GroupElement): Iterator[GroupElement] = rep.keysIteratorFrom(start)
+  implicit def ordering: Ordering[GroupElement] = rep.ordering
+  def rangeImpl(from: Option[GroupElement],until: Option[GroupElement]): SortedSet[GroupElement] = rep.rangeImpl(from, until)
 }
 
 object Group {
@@ -71,15 +77,15 @@ object Group {
     def name: String = super.toString
   }
 
-  object QuotientGroup extends Enumeration {
+  class QuotientGroup private (protected val rep: RotFlip.ValueSet)
+    extends QuotientGroup.Val with ValName with Group
+  object QuotientGroup extends scalaenum.Enum {
     import RotFlip._
 
-    type QuotientGroup = Val
-    class Val private[QuotientGroup] (protected val rep: Seq[GroupElement])
-      extends super.Val with ValName with Group
+    type Value = QuotientGroup
 
     private def Val(r: Seq[Tuple2[Int, Int]]) =
-      new Val(r.map(tup => RotFlip(tup._1, tup._2)))
+      new QuotientGroup(RotFlip.ValueSet(r.map(tup => RotFlip(tup._1, tup._2)): _*))
 
     val Cyc1  = Val(Seq((0,0)))
     val Cyc2A = Val(Seq((0,0), (1,0)))
@@ -90,29 +96,30 @@ object Group {
 
   }
 
-  object SymGroup extends Enumeration {
-    import RotFlip._
+  class SymGroup private (
+    protected val rep: RotFlip.ValueSet,
+    val quotient: QuotientGroup)
+      extends SymGroup.Val with ValName with Group {
+    import SymGroup._
 
-    type SymGroup = Val
-    class Val private[SymGroup] (
-      protected val rep: Seq[GroupElement],
-      val quotient: QuotientGroup.QuotientGroup)
-        extends super.Val with ValName with Group {
+    def sub(that: SymGroup): Boolean = this forall (that contains _)
 
-      def sub(that: SymGroup): Boolean = this forall (that contains _)
-
-      def * (g: GroupElement): SymGroup = {
-        if (this < Cyc2B || this > Cyc2E) this
-        else if (this == Cyc2B || this == Cyc2D) {
-          if (this == Cyc2B ^ g.rot % 2 == 0) Cyc2D else Cyc2B
-        } else {
-          if (this == Cyc2C ^ (g.rot + g.flip) % 2 == 0) Cyc2E else Cyc2C
-        }
+    def * (g: GroupElement): SymGroup = {
+      if (this < Cyc2B || this > Cyc2E) this
+      else if (this == Cyc2B || this == Cyc2D) {
+        if (this == Cyc2B ^ g.rot % 2 == 0) Cyc2D else Cyc2B
+      } else {
+        if (this == Cyc2C ^ (g.rot + g.flip) % 2 == 0) Cyc2E else Cyc2C
       }
     }
+  }
+  object SymGroup extends scalaenum.Enum {
+    import RotFlip._
 
-    private def Val(r: Seq[Tuple2[Int, Int]], q: QuotientGroup.QuotientGroup) =
-      new Val(r.map(tup => RotFlip(tup._1, tup._2)), q)
+    type Value = SymGroup
+
+    private def Val(r: Seq[Tuple2[Int, Int]], q: QuotientGroup) =
+      new SymGroup(RotFlip.ValueSet(r.map(tup => RotFlip(tup._1, tup._2)): _*), q)
 
     val Cyc1  = Val(Seq((0,0)), QuotientGroup.Dih4)
     val Cyc2A = Val(Seq((0,0), (2,0)), QuotientGroup.Dih2)

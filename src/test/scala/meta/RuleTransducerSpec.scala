@@ -63,8 +63,8 @@ class RuleTransducerSpec extends WordSpec with Matchers {
       possibleMapOrientation(Cyc2B.quotient, R0F0, Cyc2B.quotient, R2F0) should be (Set(R0F0, R1F0, R2F0, R3F0))
       possibleMapOrientation(Cyc2B.quotient, R0F0, Cyc2B.quotient, R1F0) should be (Set(R0F0, R1F0, R2F0, R3F0))
 
-      for (sg <- SymGroup.values; h <- RotFlip.elements) {
-        possibleMapOrientation(sg.quotient, R0F0, Cyc1.quotient, h) should be (sg.quotient.toSet.map((rf: RotFlip) => R0F0 / rf))
+      for (sg <- SymGroup.values; h <- RotFlip.values) {
+        possibleMapOrientation(sg.quotient, R0F0, Cyc1.quotient, h) should be (sg.quotient.map((rf: RotFlip) => R0F0 / rf))
       }
     }
   }
@@ -202,10 +202,10 @@ class RuleTransducerSpec extends WordSpec with Matchers {
   "possibleMapOrientation" should {
     "coincide with isReachable" in {
       for (aRepr <- QuotientGroup.values; bRepr <- QuotientGroup.values;
-           ag <- elements; bg <- elements if isReachable(aRepr, ag, bRepr, bg)) {
+           ag <- RotFlip.values; bg <- RotFlip.values if isReachable(aRepr, ag, bRepr, bg)) {
         possibleMapOrientation(aRepr, ag, bRepr, bg) should not be ('empty)
       }
-      val aRepr = Seq(R0F1, R1F1, R2F1, R3F1); val bRepr = QuotientGroup.Cyc2A
+      val aRepr = Set(R0F1, R1F1, R2F1, R3F1); val bRepr = QuotientGroup.Cyc2A
       isReachable(aRepr, R1F0, bRepr, R1F0) should be (false)
       possibleMapOrientation(aRepr, R1F0, bRepr, R1F0) should be ('empty)
     }
@@ -250,7 +250,7 @@ class RuleTransducerSpec extends WordSpec with Matchers {
     }
     "find RHS for TLA" in {
       val rule = (Tla3~WE | (Road ~> Tla3)~(2,0,11,0)) map makeTileLeft map tileToIdSymTile
-      possibleMapOrientation(Seq(R0F0, R1F0), R3F0/R2F1, QuotientGroup.Dih4, R1F1/R2F1) should not be ('empty)
+      possibleMapOrientation(Set(R0F0, R1F0), R3F0/R2F1, QuotientGroup.Dih4, R1F1/R2F1) should not be ('empty)
       createRules(rule)
     }
     "resolve diagonal TLA intersections" in {

@@ -2,7 +2,6 @@ package meta
 
 import org.scalatest.{WordSpec, Matchers}
 import RotFlip._
-import scala.language.implicitConversions
 
 class GroupElementSpec extends WordSpec with Matchers {
 
@@ -18,17 +17,17 @@ class GroupElementSpec extends WordSpec with Matchers {
       RotFlip(3,1) should be (R3F1)
     }
     "multiply associatively" in {
-      for (a <- elements; b <- elements; c <- elements) {
+      for (a <- values; b <- values; c <- values) {
         (a * b) * c should be (a * (b * c))
       }
     }
     "invert correctly" in {
-      for (a <- elements) {
+      for (a <- values) {
         a / a should be (R0F0)
       }
     }
     "have proper neutral element" in {
-      for (a <- elements) {
+      for (a <- values) {
         a * R0F0 should be (a)
         R0F0 * a should be (a)
       }
@@ -44,14 +43,38 @@ class GroupElementSpec extends WordSpec with Matchers {
       R2F1 * R2F1 should be (R0F0)
       R3F1 * R2F1 should be (R1F0)
       R1F1 * R1F1 should be (R0F0)
+      val multTable = Array(
+        Array(0,1,2,3,4,5,6,7),
+        Array(1,2,3,0,7,4,5,6),
+        Array(2,3,0,1,6,7,4,5),
+        Array(3,0,1,2,5,6,7,4),
+        Array(4,5,6,7,0,1,2,3),
+        Array(5,6,7,4,3,0,1,2),
+        Array(6,7,4,5,2,3,0,1),
+        Array(7,4,5,6,1,2,3,0))
+      for (a <- values; b <- values) {
+        (a * b).id should be (multTable(a.id)(b.id))
+      }
+    }
+    "divide correctly" in {
+      val divTable = Array(
+        Array(0,3,2,1,4,5,6,7),
+        Array(1,0,3,2,7,4,5,6),
+        Array(2,1,0,3,6,7,4,5),
+        Array(3,2,1,0,5,6,7,4),
+        Array(4,7,6,5,0,1,2,3),
+        Array(5,4,7,6,3,0,1,2),
+        Array(6,5,4,7,2,3,0,1),
+        Array(7,6,5,4,1,2,3,0))
+      for (a <- values; b <- values) {
+        (a / b).id should be (divTable(a.id)(b.id))
+      }
     }
   }
 }
 
 class SymGroupSpec extends WordSpec with Matchers {
   import Group.SymGroup, SymGroup._
-
-  implicit def value2val(v: SymGroup.Value): SymGroup = v.asInstanceOf[SymGroup]
 
   "SymGroup" should {
     "have quotient group of correct order" in {

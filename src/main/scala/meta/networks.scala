@@ -1,44 +1,42 @@
 package meta
 
+class Network private (
+    val height: Int,
+    val typ: Network.NetworkType,
+    val base: Option[Network],
+    val rhwPieceId: Option[Int],
+    val rhwRangeId: Option[Int]) extends Network.Val {
+
+  import Network._
+  def isRhw: Boolean = rhwRangeId.isDefined
+  def isNwm: Boolean = this >= Tla3 && this <= Ave6m
+  def isTla: Boolean = this == Tla3 || this == Tla5 || this == Tla7m
+
+  def isSymm: Boolean = typ == Symmetrical
+
+  val parseFlag: Int => Flag = if (typ == Symmetrical) Flag.parseBiFlag _ else Flag.parseInOutFlag _
+
+  def ~ (w: Int, n: Int, e: Int, s: Int): Segment =
+    Segment(this, Flags(parseFlag(w), parseFlag(n), parseFlag(e), parseFlag(s)))
+
+  def ~ (flags: (Int, Int, Int, Int)): Segment =
+    this ~ (flags._1, flags._2, flags._3, flags._4)
+
+//    def ~ (flags: Flags): Segment = Segment(this, flags)
+
+  def ~> (that: Network): CoupleNetwork = CoupleNetwork(this, that)
+}
+
 /** List of all the base and override networks. It is not recommended to change
   * anything in this file.
   */
-object Network extends Enumeration {
+object Network extends scalaenum.Enum {
+  type Value = Network
 
   sealed abstract class NetworkType
   case object Symmetrical extends NetworkType
   case object Asymmetrical extends NetworkType
   case object AvenueLike extends NetworkType
-
-  import scala.language.implicitConversions
-  implicit def valueToNetwork(v: Value): Network = v.asInstanceOf[Network]
-
-  type Network = Val
-  protected class Val private[Network] (
-      val height: Int,
-      val typ: NetworkType,
-      val base: Option[Network],
-      val rhwPieceId: Option[Int],
-      val rhwRangeId: Option[Int]) extends super.Val {
-
-    def isRhw: Boolean = rhwRangeId.isDefined
-    def isNwm: Boolean = this >= Tla3 && this <= Ave6m
-    def isTla: Boolean = this == Tla3 || this == Tla5 || this == Tla7m
-
-    def isSymm: Boolean = typ == Symmetrical
-
-    val parseFlag: Int => Flag = if (typ == Symmetrical) Flag.parseBiFlag _ else Flag.parseInOutFlag _
-
-    def ~ (w: Int, n: Int, e: Int, s: Int): Segment =
-      Segment(this, Flags(parseFlag(w), parseFlag(n), parseFlag(e), parseFlag(s)))
-
-    def ~ (flags: (Int, Int, Int, Int)): Segment =
-      this ~ (flags._1, flags._2, flags._3, flags._4)
-
-//    def ~ (flags: Flags): Segment = Segment(this, flags)
-
-    def ~> (that: Network): CoupleNetwork = CoupleNetwork(this, that)
-  }
 
   /* base networks */
   val Road          = new Network(0, Symmetrical, None, Some(0x1100), None)
