@@ -40,6 +40,7 @@ object Flag {
   }
 
   val Zero: Flag = new Flag(Zero, Zero, "0", _ => Zero)
+  val Four: Flag = new Flag(Four, Four, "4", _ => Four)
 
   trait CommonFlags {
     private[Flag] class NestedFlag(initFlip: => Flag, initRev: => Flag, i: Int, project: Flag.CommonFlags => Flag) extends Flag(initFlip, initRev, stringPrefix + i + stringSuffix, project) {
@@ -85,6 +86,7 @@ object Flag {
     case 1 => Bi.DiagLeft
     case 2 => Bi.Orth
     case 3 => Bi.DiagRight
+    case 4 => Four
     case 11 => Bi.BlendLeft
     case 13 => Bi.BlendRight
     case 111 => Bi.ExtBlendLeft
