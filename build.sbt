@@ -22,4 +22,7 @@ def transduce(rule: Rule[Tile]): Unit = RuleTransducer(rule) foreach println
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.5" % "test"
 
-libraryDependencies += "scalaenum" %% "scalaenum" % "0.1.2" from "https://dl.dropboxusercontent.com/s/gr947c7hs4u7xb9/scalaenum_2.11-0.1.2.jar"
+
+resolvers += "memo33-gdrive-repo" at "https://googledrive.com/host/0B9r6o2oTyY34ZVc4SFBWMV9yb0E/repo/releases/"
+
+libraryDependencies += "com.github.memo33" %% "scalaenum" % "0.1.3"
