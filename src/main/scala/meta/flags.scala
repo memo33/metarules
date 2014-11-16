@@ -162,6 +162,9 @@ object Flags {
   def apply(w: Flag, n: Flag, e: Flag, s: Flag): Flags = new Flags(Array(w, n, e, s))
   def apply(wnes: IndexedSeq[Flag]): Flags = new Flags(wnes.toArray)
 
+  // use carefully and only with directed flags
+  def reverseIntFlags(flags: IntFlags): IntFlags = flags match { case (w, n, e, s) => (-w, -n, -e, -s) }
+
   // orth
   val WE = (-2,0,2,0)
   val NS = (0,-2,0,2)

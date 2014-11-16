@@ -5,10 +5,8 @@ import FlexFlyTiles._, Adjacencies._
 
 class FlexFlyRuleGenerator(val resolver: IdResolver) extends RuleGenerator {
 
-  private def reverseFlags(flags: IntFlags): IntFlags = flags match { case (w, n, e, s) => (-w, -n, -e, -s) }
-
   def start(): Unit = {
-    Seq[IntFlags => IntFlags](identity _, reverseFlags _) foreach { orient =>
+    Seq[IntFlags => IntFlags](identity _, reverseIntFlags _) foreach { orient =>
       // orient is responsible for distinguishing between A1 and A2 curve:
       // we only write code for A1 curve, orient reverses all the flags for us
       for (main <- RhwNetworks from Mis to L4Rhw4) {
