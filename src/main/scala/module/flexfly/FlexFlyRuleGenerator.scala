@@ -20,22 +20,18 @@ class FlexFlyRuleGenerator(val resolver: IdResolver) extends RuleGenerator {
         createRules()
 
         val deactivated = Rhw12s + L1Rhw12s + L2Rhw12s + Rhw10c + L1Rhw10c + L2Rhw10c
-        for (minor <- RhwNetworks if minor.height != main.height && !deactivated(minor)) {
+        for (minor <- RhwNetworks if minor.height != main.height && !deactivated(minor); base <- minor.base) {
           // crossings of anchor tiles 0, 1, 3 and 6
           for ((t, rot) <- Seq(T0 -> R1F0, T0 -> R3F0, T1 -> R1F0, T1 -> R3F0, T3 -> R3F0, T3 -> R2F0, T6 -> R1F0)) {
-            Rules += main~orient(t) * rot | minor~WE~EW | main~orient(t) * rot & minor~WE~EW | %
-            for (base <- minor.base) {
-              Rules += main~orient(t) * rot & minor~WE~EW | (base ~> minor)~WE~EW
-            }
+            Rules += main~orient(t) * rot | minor~WE~EW | main~orient(t) * rot & minor~WE~EW | %   // t < orth
+            Rules += main~orient(t) * rot & minor~WE~EW | (base ~> minor)~WE~EW   // t > orth
           }
           // of non-achor tiles 2 (usual direction) and 4 (alternative direction)
           for ((t, rot) <- Seq(T2 -> R1F0, T4 -> R0F0)) {
-            Rules += main~orient(T3) * rot | minor~WE~EW | main~orient(T3) * rot & minor~WE~EW | %   // tile 3 actually
-            Rules += main~orient(T3) * rot & minor~WE~EW | minor~WE~EW | % | main~orient(t) * rot & minor~WE~EW
-            for (base <- minor.base) {
-              Rules += main~orient(T3) * rot & minor~WE~EW | base~WE~EW | % | main~orient(t) * rot & minor~WE~EW
-              Rules += main~orient(t) * rot & minor~WE~EW | (base ~> minor)~WE~EW
-            }
+            Rules += main~orient(T3) * rot & minor~WE~EW | base~WE~EW | % | main~orient(t) * rot & minor~WE~EW   // T3 > t
+            Rules += main~orient(T3) * rot | minor~WE~EW | main~orient(T3) * rot & minor~WE~EW | main~orient(t) * rot & minor~WE~EW   // T3 < orth
+            Rules += main~orient(T3) * rot | main~orient(t) * rot & minor~WE~EW | main~orient(T3) * rot & minor~WE~EW | %   // T3 < t
+            Rules += main~orient(t) * rot & minor~WE~EW | (base ~> minor)~WE~EW   // t > orth
           }
 
           // Now we still need to connect the end tiles to orth or diag network
@@ -55,23 +51,22 @@ class FlexFlyRuleGenerator(val resolver: IdResolver) extends RuleGenerator {
           }
 
           // additional crossing of minor and tile 6 in different direction
-          Rules += main~orient(T6) * R3F0 & minor~WE~EW | (Dirtroad ~> main)~orient(NW) & minor~WE~EW
-          for (base <- minor.base) {
-            Rules += main~orient(T6) * R3F0 & minor~WE~EW | (Dirtroad ~> main)~orient(NW) & (base ~> minor)~WE~EW
-            Rules += main~orient(T6) * R3F0 & minor~WE~EW | main~orient(NW) & (base ~> minor)~WE~EW
-          }
-          Rules += main~orient(T6) * R3F0 | main~orient(NW) & minor~WE~EW | main~orient(T6) * R3F0 & minor~WE~EW | %
+          Rules += main~orient(T6) * R3F0 & minor~WE~EW | (Dirtroad ~> main)~orient(NW) & (base ~> minor)~WE~EW   // T6 > OxD
+          Rules += main~orient(T6) * R3F0 & minor~WE~EW | (Dirtroad ~> main)~orient(NW) & minor~WE~EW   // stability
+          Rules += main~orient(T6) * R3F0 & minor~WE~EW | main~orient(NW) & (base ~> minor)~WE~EW   // stability
+          Rules += main~orient(T6) * R3F0 | main~orient(NW) & minor~WE~EW | main~orient(T6) * R3F0 & minor~WE~EW | %   // T6 < OxD
 
-          // Now we consider cases involving two crossing networks
-          for ((other, directions) <- adjacentNetworks(minor) if other.isRhw && other.height == minor.height && !deactivated(other)) {
+          // Now we consider cases involving two adjacent crossing networks
+          for ((other, directions) <- adjacentNetworks(minor)
+               if other.isRhw && other != Dirtroad && other.height == minor.height && !deactivated(other)) {
             val (minDir, otherDir) = directions match {
               case NSNS => (NS, NS)
               case NSSN => (NS, SN)
               case SNNS => (SN, NS)
               case SNSN => (SN, SN)
             }
-            Rules += (Dirtroad ~> main)~orient(EW) & minor~minDir | main~orient(T0)               & other~otherDir
-            Rules += main~orient(T6) * R3F0        & minor~minDir | (Dirtroad ~> main)~orient(NW) & other~otherDir
+            Rules += (Dirtroad ~> main)~orient(EW) & minor~minDir | main~orient(T0)        & other~otherDir
+            Rules += (Dirtroad ~> main)~orient(SE) & minor~minDir | main~orient(T6) * R1F0 & other~otherDir
           }
         }
         createRules()
