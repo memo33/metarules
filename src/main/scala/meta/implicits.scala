@@ -1,4 +1,4 @@
-package meta
+package metarules.meta
 
 /** Defines a number of implicit conversions most of which are needed to make
   * the MetaRUL syntax work.

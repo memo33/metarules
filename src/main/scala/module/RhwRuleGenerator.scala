@@ -1,6 +1,6 @@
-package module
+package metarules.module
 
-import meta._
+import metarules.meta._
 import Network._, Flags._, Flag._, RotFlip._, Implicits._
 import scala.collection.mutable.Buffer
 import NetworkProperties._

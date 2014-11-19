@@ -1,4 +1,4 @@
-package meta
+package metarules.meta
 
 import scala.collection.immutable.SortedSet
 import RotFlip.GroupElement

@@ -1,4 +1,4 @@
-package meta
+package metarules.meta
 
 import Group._, SymGroup._, QuotientGroup._, RotFlip._
 import Flag._

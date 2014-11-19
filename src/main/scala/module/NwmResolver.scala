@@ -1,6 +1,6 @@
-package module
+package metarules.module
 
-import meta._
+import metarules.meta._
 import Network._
 import RotFlip._
 import Flags._

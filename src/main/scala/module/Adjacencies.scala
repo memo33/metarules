@@ -1,6 +1,6 @@
-package module
+package metarules.module
 
-import meta._, Network._, Flags._, Implicits._
+import metarules.meta._, Network._, Flags._, Implicits._
 import scala.collection.mutable
 import NetworkProperties._
 

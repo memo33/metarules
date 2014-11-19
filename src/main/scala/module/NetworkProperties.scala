@@ -1,6 +1,6 @@
-package module
+package metarules.module
 
-import meta._, Network._
+import metarules.meta._, Network._
 
 object NetworkProperties {
 

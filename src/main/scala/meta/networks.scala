@@ -1,4 +1,4 @@
-package meta
+package metarules.meta
 
 class Network private (
     val height: Int,
