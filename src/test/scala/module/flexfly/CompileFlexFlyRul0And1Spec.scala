@@ -9,8 +9,7 @@ class CompileFlexFlyRul0And1Spec extends WordSpec with Matchers {
 
   "FlexFly RUL1 falsies" should {
     "be permanent" in {
-      val file = new java.io.File("src/test/resources/FlexFlyRUL1.txt")
-      for (scanner <- managed(new java.util.Scanner(file))) {
+      for (scanner <- managed(new java.util.Scanner(getClass.getResourceAsStream("/FlexFlyRUL1.txt")))) {
         val previousFalsies = collection.JavaConversions.asScalaIterator(scanner).filter(_.nonEmpty)
 
         val resolve = new FlexFlyResolver
