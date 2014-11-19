@@ -1,3 +1,4 @@
+package metarules
 
 /** Contains internal MetaRUL implementation (mostly); changes in this package
   * are usually only required for adding additional flags; for the code

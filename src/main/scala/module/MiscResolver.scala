@@ -1,6 +1,6 @@
-package module
+package metarules.module
 
-import meta._, Network._, RotFlip._, Flags._
+import metarules.meta._, Network._, RotFlip._, Flags._
 import Implicits.segmentToTile
 
 class MiscResolver extends IdResolver {

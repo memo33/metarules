@@ -14,7 +14,7 @@ scalacOptions ++= Seq(
   "-target:jvm-1.6")
 
 initialCommands in console := """
-import meta._
+import metarules._, meta._
 import Implicits._, Network._, Flag._, Flags._, RotFlip._, Tile.{CopyTile => %}
 implicit val resolve = module.Main.resolve
 def transduce(rule: Rule[Tile]): Unit = RuleTransducer(rule) foreach println

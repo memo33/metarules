@@ -1,9 +1,10 @@
-package meta
+package metarules.meta
 
 import org.scalatest.{WordSpec, Matchers}
 import Implicits._
 import Group._, RotFlip._, SymGroup._, Network._, Flags._
 import RuleTransducer._
+import metarules.module
 
 
 class RuleTransducerSpec extends WordSpec with Matchers {

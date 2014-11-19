@@ -1,4 +1,4 @@
-package meta
+package metarules.meta
 
 import org.scalatest.{WordSpec, Matchers}
 

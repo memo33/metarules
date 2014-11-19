@@ -1,4 +1,4 @@
-package meta
+package metarules.meta
 
 /** Needs to be implemented for generating RUL2 code for a specific project,
   * along with an [[IdResolver]].

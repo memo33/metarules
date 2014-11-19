@@ -1,4 +1,4 @@
-package meta
+package metarules.meta
 
 import RotFlip._
 import Group.SymGroup
