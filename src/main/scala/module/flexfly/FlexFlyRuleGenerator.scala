@@ -1,7 +1,7 @@
 package module.flexfly
 
 import meta._, module._, Network._, RotFlip._, Flags._, Implicits._
-import FlexFlyTiles._, Adjacencies._
+import FlexFlyTiles._, Adjacencies._, NetworkProperties._
 
 class FlexFlyRuleGenerator(val resolver: IdResolver) extends RuleGenerator {
 
@@ -43,8 +43,8 @@ class FlexFlyRuleGenerator(val resolver: IdResolver) extends RuleGenerator {
           // First we consider cases in which only one of the two tiles has crossing
           val minDirs = {
             val b = Seq.newBuilder[IntFlags]
-            if (RhwRuleGenerator.hasRightShoulder(minor)) b += NS
-            if (RhwRuleGenerator.hasLeftShoulder(minor)) b += SN
+            if (hasRightShoulder(minor)) b += NS
+            if (hasLeftShoulder(minor)) b += SN
             b.result
           }
           for (minDir <- minDirs) {

@@ -39,6 +39,9 @@ class RuleTransducerSpec extends WordSpec with Matchers {
         count(ag, bg)
       }
     }
+    "be correct for tiles with same IID (TODO FIX THIS!)" ignore {
+      RuleTransducer(Road~NS | Road~>Road~WE).toSeq.size should be (RuleTransducer(Ave2~NS | Road~>Ave2~WE).toSeq.size)
+    }
   }
 
   "possibleMapOrientation" should {

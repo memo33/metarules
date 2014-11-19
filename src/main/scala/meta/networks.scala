@@ -137,8 +137,8 @@ object Network extends scalaenum.Enum {
   // network collections
   val BaseNetworks = values.filter(_.base.isEmpty)
   val OverrideNetworks = values.filter(_.base.isDefined)
-  val GlrNetworks = values.slice(Glr1.id, Glr4.id + 1)
-  val RhwNetworks = ValueSet(Dirtroad) ++ values.slice(L1Rhw2.id, L2Rhw10c.id + 1)
-  val NwmNetworks = values.slice(Tla3.id, Ave6m.id + 1)
-  val SamNetworks = values.slice(Sam1.id, Sam10.id + 1)
+  val GlrNetworks = values from Glr1 to Glr4
+  val RhwNetworks = ValueSet(Dirtroad) ++ (values from L1Rhw2 to L2Rhw10c)
+  val NwmNetworks = values from Tla3 to Ave6m
+  val SamNetworks = values from Sam1 to Sam10
 }

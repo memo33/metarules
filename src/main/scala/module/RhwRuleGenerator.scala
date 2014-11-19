@@ -3,6 +3,7 @@ package module
 import meta._
 import Network._, Flags._, Flag._, RotFlip._, Implicits._
 import scala.collection.mutable.Buffer
+import NetworkProperties._
 
 
 object RhwRuleGenerator {
@@ -14,22 +15,6 @@ object RhwRuleGenerator {
       assert(m.height == level)
       m
     }
-  }
-
-  private val nonRightShoulderNetworks: Set[Network] = {
-    var set = Set.empty[Network]
-    set += (Rhw6cm, L1Rhw6cm, L2Rhw6cm)
-    set += (Rhw8sm, L1Rhw8sm, L2Rhw8sm)
-    set += (Ave6m, Tla7m)
-    set
-  }
-  def hasRightShoulder(n: Network) = !nonRightShoulderNetworks(n)
-
-  def hasLeftShoulder(n: Network) = {
-    n.typ != AvenueLike &&
-    !(n.typ == Symmetrical && !hasRightShoulder(n)) && // this is treated as right shoulder only, for efficiency
-    !(n >= Rhw8s && n <= L2Rhw10c) &&
-    !(n >= Tla5 && n <= Ave6m)
   }
 }
 

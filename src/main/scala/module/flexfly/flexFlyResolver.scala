@@ -52,8 +52,8 @@ class FlexFlyResolver extends RhwResolver {
       minReversed <- Seq(false, true)
       tile0 = (if (reversed) seg0.reverse else seg0) & (if (minReversed) minor~SN else minor~NS)
       rf <- RotFlip.values
-      tile = tile0 * rf
     } /*do*/ {
+      val tile = tile0 * rf
       m.getOrElseUpdate(tile.segs map (_.flags), CrossingProp(pid, rf, reversed, minReversed))
     }
     m.toMap
