@@ -22,10 +22,10 @@ class FlexFlyRuleGenerator(val resolver: IdResolver) extends RuleGenerator {
 
         val deactivated = Rhw12s + L1Rhw12s + L2Rhw12s + Rhw10c + L1Rhw10c + L2Rhw10c
         for (minor <- RhwNetworks if minor.height != main.height && !deactivated(minor); base <- minor.base) {
-          val minDirs = { // the directions of minor for which the west edge is a shoulder (possibly empty)
+          val minDirs = { // the directions of minor for which the north edge is a shoulder (possibly empty)
             val b = Seq.newBuilder[IntFlags]
-            if (hasRightShoulder(minor)) b += NS
-            if (hasLeftShoulder(minor)) b += SN
+            if (hasRightShoulder(minor)) b += EW
+            if (hasLeftShoulder(minor)) b += WE
             b.result
           }
           // crossings of anchor tiles 0, 1, 3 and 6
@@ -34,12 +34,12 @@ class FlexFlyRuleGenerator(val resolver: IdResolver) extends RuleGenerator {
             Rules += main~orient(t) * rot & minor~WE~EW | (base ~> minor)~WE~EW   // t > orth
           }
           for ((t, rot) <- Seq(T3 -> R0F1, T6 -> R0F0); dir <- minDirs) { // same as above but restricted to physically possible directions
-            Rules += main~orient(t) * rot | minor~dir * R1F0 | main~orient(t) * rot & minor~dir * R1F0 | %   // t < orth
-            Rules += main~orient(t) * rot & minor~dir * R1F0 | base~dir * R1F0 | % | minor~dir * R1F0   // t > orth
+            Rules += main~orient(t) * rot | minor~dir | main~orient(t) * rot & minor~dir | %   // t < orth
+            Rules += main~orient(t) * rot & minor~dir | base~dir | % | minor~dir   // t > orth
           }
           // of non-achor tiles 2 (usual direction) and 4 (alternative direction)
-          for (((t, rot), physicalDirs) <- Seq(T2 -> R1F0 -> Seq(NS, SN), T4 -> R0F0 -> minDirs); dir <- physicalDirs) {
-            val minSeg = minor~dir * R1F0;     val baseSeg = base~dir * R1F0
+          for (((t, rot), physicalDirs) <- Seq(T2 -> R1F0 -> Seq(EW, WE), T4 -> R0F0 -> minDirs); dir <- physicalDirs) {
+            val minSeg = minor~dir;            val baseSeg = base~dir
             val t3Seg = main~orient(T3) * rot; val tSeg = main~orient(t) * rot
             Rules += t3Seg & minSeg | baseSeg       | %              | tSeg & minSeg   // T3 > t
             Rules += t3Seg          | minSeg        | t3Seg & minSeg | tSeg & minSeg   // T3 < orth
@@ -49,19 +49,19 @@ class FlexFlyRuleGenerator(val resolver: IdResolver) extends RuleGenerator {
           // moreover, we need to make sure the override of minor carries over
           // between tiles 3 and 6
           for (dir <- minDirs) {
-            Rules += main~orient(T3) & minor~dir * R1F0 | main~orient(T6) | % | main~orient(T6) & minor~dir * R1F0   // T3 > T6
-            Rules += main~orient(T3) | main~orient(T6) & minor~dir * R1F0 | main~orient(T3) & minor~dir * R1F0 | %   // T3 < T6
+            Rules += main~orient(T3) & minor~dir | main~orient(T6) | % | main~orient(T6) & minor~dir   // T3 > T6
+            Rules += main~orient(T3) | main~orient(T6) & minor~dir | main~orient(T3) & minor~dir | %   // T3 < T6
           }
 
           // Now we still need to connect the end tiles to orth or diag network
           // if crossings are present.
           // First we consider cases in which only one of the two tiles has crossing
           for (minDir <- minDirs) {
-            Rules += (Dirtroad ~> main)~orient(EW)                       | main~orient(T0) & minor~minDir
-            Rules += (Dirtroad ~> main)~orient(EW) & minor~minDir * R2F0 | main~orient(T0)
-            Rules += main~orient(T6) * R3F0                              | (Dirtroad ~> main)~orient(NW) & minor~minDir
+            Rules += (Dirtroad ~> main)~orient(EW)                       | main~orient(T0) & minor~minDir * R3F0
+            Rules += (Dirtroad ~> main)~orient(EW) & minor~minDir * R1F0 | main~orient(T0)
+            Rules += main~orient(T6) * R3F0                              | (Dirtroad ~> main)~orient(NW) & minor~minDir * R3F0
             if (!isTripleTile(minor)) { // otherwise physically impossible
-              Rules += main~orient(T6) * R3F0      & minor~minDir * R2F0 | (Dirtroad ~> main)~orient(NW)
+              Rules += main~orient(T6) * R3F0      & minor~minDir * R1F0 | (Dirtroad ~> main)~orient(NW)
             }
           }
 
