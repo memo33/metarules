@@ -145,14 +145,16 @@ object CompileFlexFlyRul0And1 {
     } .mkString(" ")
   }
 
-  def rul0Entry(hid: Int, network: Network, reverse: Boolean) = {
+  def rul0Entry(hid: Int, network: Network, reverse: Boolean, previewIter: Iterator[(Int, String)]) = {
+    val (previewId90, previewName90) = previewIter.next
+    val (previewId45, previewName45) = previewIter.next
     val orient: IntFlags => IntFlags = if (reverse) reverseIntFlags _ else identity _
     f"""
     |[HighwayIntersectionInfo_0x$hid%08X]
     |;Added by memo 2014/11/16
     |;FlexFly 90
-    |Piece = -32.0, -48.0, 0, 0, 0x5CAB0005
-    |PreviewEffect = preview_emis15wrc90flyovr00
+    |Piece = -80.0, 0.0, 0, 1, 0x$previewId90%08X
+    |PreviewEffect = $previewName90
     |
     |CellLayout=........
     |CellLayout=.abY....
@@ -209,8 +211,8 @@ object CompileFlexFlyRul0And1 {
     |[HighwayIntersectionInfo_0x${hid+1}%08X]
     |;Added by memo 2014/11/16
     |;FlexFly 45
-    |Piece = -32.0, -48.0, 0, 0, 0x5CAB0005
-    |PreviewEffect = preview_emis15wrc90flyovr00
+    |Piece = -32.0, 0.0, 0, 1, 0x$previewId45%08X
+    |PreviewEffect = $previewName45
     |
     |CellLayout=........
     |CellLayout=...Xc...
@@ -262,7 +264,16 @@ object CompileFlexFlyRul0And1 {
     |""".stripMargin
   }
 
-  def printRul0(file: File) = for (printer <- resource.managed(new PrintWriter(file))) {
+  def previews(resolve: IdResolver) = RhwNetworks.from(Mis).to(L4Rhw4).toSeq.flatMap { n =>
+    FlexFlyRuleGenerator.orientations.flatMap { orient =>
+      Seq(T0, T1) map { t =>
+        val id = resolve(n~orient(t)).id & ~0xF | 0x5
+        (id, f"preview_flexfly$id%08x")
+      }
+    }
+  }
+
+  def printRul0(file: File, resolver: IdResolver) = for (printer <- resource.managed(new PrintWriter(file))) {
     val hid0 = 0x5B00
     for (hid <- hid0 until hid0 + 40) {
       val numbers = (0 until 8) map (i => f"${hid+0x10000*i}%X") mkString ", "
@@ -273,8 +284,9 @@ object CompileFlexFlyRul0And1 {
     printer.println()
 
     val hids = Iterator.iterate(hid0)(_ + 2)
+    val previewIter = previews(resolver).iterator
     for (network <- RhwNetworks from Mis to L4Rhw4; reverse <- Seq(false, true)) {
-      printer.println(rul0Entry(hids.next, network, reverse))
+      printer.println(rul0Entry(hids.next, network, reverse, previewIter))
     }
   }
 
@@ -301,7 +313,7 @@ object CompileFlexFlyRul0And1 {
     val rul0File = new File("target/FlexFlyRUL0.txt")
     val rul1File = new File("target/FlexFlyRUL1.txt")
     val resolver = new FlexFlyResolver
-    printRul0(rul0File)
+    printRul0(rul0File, resolver)
     printRul1(rul1File, resolver)
   }
 

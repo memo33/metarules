@@ -4,10 +4,25 @@ package module.flexfly
 import meta._, module._, Network._, RotFlip._, Flags._, Implicits._
 import FlexFlyTiles._, Adjacencies._, NetworkProperties._
 
+object FlexFlyRuleGenerator {
+
+  val orientations = Seq[IntFlags => IntFlags](identity _, reverseIntFlags _)
+  private[flexfly] val deactivated = Rhw12s + L1Rhw12s + L2Rhw12s + Rhw10c + L1Rhw10c + L2Rhw10c
+
+  /** the directions of a network for which the north edge is a shoulder (possibly empty) */
+  def directionsWithShoulderNorth(n: Network) = {
+    val b = List.newBuilder[IntFlags]
+    if (hasRightShoulder(n)) b += EW
+    if (hasLeftShoulder(n)) b += WE
+    b.result
+  }
+}
+
 class FlexFlyRuleGenerator(val resolver: IdResolver) extends RuleGenerator {
+  import FlexFlyRuleGenerator._
 
   def start(): Unit = {
-    Seq[IntFlags => IntFlags](identity _, reverseIntFlags _) foreach { orient =>
+    for (orient <- orientations) {
       // orient is responsible for distinguishing between A1 and A2 curve:
       // we only write code for A1 curve, orient reverses all the flags for us
       for (main <- RhwNetworks from Mis to L4Rhw4) {
@@ -20,14 +35,8 @@ class FlexFlyRuleGenerator(val resolver: IdResolver) extends RuleGenerator {
         Rules += main~orient(T6) * R3F0 | (Dirtroad ~> main)~orient(NW)
         createRules()
 
-        val deactivated = Rhw12s + L1Rhw12s + L2Rhw12s + Rhw10c + L1Rhw10c + L2Rhw10c
         for (minor <- RhwNetworks if minor.height != main.height && !deactivated(minor); base <- minor.base) {
-          val minDirs = { // the directions of minor for which the north edge is a shoulder (possibly empty)
-            val b = Seq.newBuilder[IntFlags]
-            if (hasRightShoulder(minor)) b += EW
-            if (hasLeftShoulder(minor)) b += WE
-            b.result
-          }
+          val minDirs = directionsWithShoulderNorth(minor)
           // crossings of anchor tiles 0, 1, 3 and 6
           for ((t, rot) <- Seq(T0 -> R1F0, T0 -> R3F0, T1 -> R1F0, T1 -> R3F0, T3 -> R3F0, T6 -> R1F0)) {
             Rules += main~orient(t) * rot | minor~WE~EW | main~orient(t) * rot & minor~WE~EW | %   // t < orth

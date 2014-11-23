@@ -22,4 +22,23 @@ object NetworkProperties {
   }
   def isSingleTile(n: Network): Boolean = !isDoubleTile(n) && !isTripleTile(n)
 
+  // currently, RHW only
+  val ground: Map[Network, Network] = RhwNetworks.from(L1Rhw2).scanLeft(Dirtroad -> Dirtroad) { case ((prev, base), n) =>
+    if (n.height > prev.height) n -> base else n -> n
+  } (collection.breakOut)
+
+  // currently, RHW only
+  def atHeight(ground: Network, height: Int) = {
+    require(ground.isRhw && ground.height == 0)
+    val n = if (ground != Dirtroad) {
+      Network(ground.id + height)
+    } else if (height == 0) {
+      Dirtroad
+    } else {
+      Network(L1Rhw2.id - 1 + height)
+    }
+    require(n.height == height, ground + " does not have height level " + height)
+    n
+  }
+
 }
