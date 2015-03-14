@@ -1,5 +1,11 @@
 package metarules.meta
 
+/*
+  // TODO IMPORTANT: All of the tests in this file are commented out as they
+  // depend on a proper rule resolver, which however was moved to another
+  // repository and cannot be accessed from here.
+
+
 import org.scalatest.{WordSpec, Matchers}
 import Implicits._
 import Group._, RotFlip._, SymGroup._, Network._, Flags._
@@ -267,3 +273,4 @@ class RuleTransducerSpec extends WordSpec with Matchers {
     }
   }
 }
+*/
