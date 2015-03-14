@@ -25,4 +25,6 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.5" % "test"
 
 resolvers += "memo33-gdrive-repo" at "https://googledrive.com/host/0B9r6o2oTyY34ZVc4SFBWMV9yb0E/repo/releases/"
 
+libraryDependencies += "com.github.memo33" %% "scdbpf" % "0.1.5"
+
 libraryDependencies += "com.github.memo33" %% "scalaenum" % "0.1.3"

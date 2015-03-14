@@ -57,8 +57,6 @@ trait Curve45Generator { _: RuleGenerator =>
     (n.isRhw && n > L4Rhw6s || n.isNwm && n >= Tla5) && !hasMiniCurve(n, inside)
   }
 
-  private def reverseFlags(flags: IntFlags): IntFlags = flags match { case (w, n, e, s) => (-w, -n, -e, -s) }
-
   private def stabilize(rule: Rule[Tile]): Seq[Rule[Tile]] = {
     if (rule(0) == rule(2) || rule(1) == rule(3)) {
       Seq(rule)
@@ -72,7 +70,7 @@ trait Curve45Generator { _: RuleGenerator =>
     // to reverse the flags in order to create the corresponding inside
     // curves
     def curveCode(inside: Boolean): Unit = {
-      val orient: IntFlags => IntFlags = if (!inside) identity else reverseFlags
+      val orient: IntFlags => IntFlags = if (!inside) identity else reverseIntFlags
       assert(main.base.isDefined)
       val base = main.base.get
       if (hasSharedDiagCurve(main)) {

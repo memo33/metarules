@@ -19,6 +19,7 @@ object RhwRuleGenerator {
 }
 
 class RhwRuleGenerator(val resolver: IdResolver) extends RuleGenerator with Curve45Generator with Adjacencies {
+  import RhwRuleGenerator._
 
   private def rhwIntersectionAllowed(rhw: Network, any: Network): Boolean = {
     if (!rhw.isRhw) {
@@ -56,7 +57,6 @@ class RhwRuleGenerator(val resolver: IdResolver) extends RuleGenerator with Curv
 //  private def isCNetwork(n: Network) = n >= Rhw6c && n <= L2Rhw10c || n == Ave6 || n == Ave8
 
   def createMultiTileStarters(): Unit = {
-    import RhwRuleGenerator.HeightLevel
     val g = 0 // ground level
     val heights = 0 to 2
     for (h <- heights) {

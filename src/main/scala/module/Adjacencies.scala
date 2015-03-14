@@ -4,12 +4,12 @@ import metarules.meta._, Network._, Flags._, Implicits._
 import scala.collection.mutable
 import NetworkProperties._
 
-trait Adjacencies { this: RhwRuleGenerator =>
+object Adjacencies {
 
-  private val NSNS = 0
-  private val NSSN = 1
-  private val SNNS = 2
-  private val SNSN = 3
+  val NSNS = 0
+  val NSSN = 1
+  val SNNS = 2
+  val SNSN = 3
 
   /** Covers the multi-tile "inner" adjacencies */
   private val multitileNetworks: Map[Network, Seq[(Network, Int)]] = {
@@ -74,6 +74,11 @@ trait Adjacencies { this: RhwRuleGenerator =>
       multAdjs
     }
   })
+
+}
+
+trait Adjacencies { this: RhwRuleGenerator =>
+  import Adjacencies._
 
   /** Covers all cases of parallel adjacent +/X-intersections, i.e. OxO, OxD,
     * DxO, DxD, save for 'inner' diagonal intersections.
