@@ -1,6 +1,8 @@
 name := "metarules"
 
-version := "0.1"
+organization := "com.github.memo33"
+
+version := "0.1.1"
 
 scalaVersion := "2.11.0"
 
@@ -9,7 +11,7 @@ scalacOptions ++= Seq(
   "-deprecation",
   "-feature",
   //"-Yinline-warnings",
-  //"-optimize",
+  "-optimize",
   "-encoding", "UTF-8",
   "-target:jvm-1.6")
 
