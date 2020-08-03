@@ -1,6 +1,8 @@
  MetaRules
 ===========
 
+[ ![Download](https://api.bintray.com/packages/memo33/maven/metarules/images/download.svg) ](https://bintray.com/memo33/maven/metarules/_latestVersion)
+
 A meta language for RUL2 code, implemented as internal DSL in Scala.
 
 
