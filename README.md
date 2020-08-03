@@ -2,6 +2,7 @@
 ===========
 
 [ ![Download](https://api.bintray.com/packages/memo33/maven/metarules/images/download.svg) ](https://bintray.com/memo33/maven/metarules/_latestVersion)
+[![Build Status](https://travis-ci.org/memo33/metarules.svg?branch=master)](https://travis-ci.org/memo33/metarules)
 
 A meta language for RUL2 code, implemented as internal DSL in Scala.
 
