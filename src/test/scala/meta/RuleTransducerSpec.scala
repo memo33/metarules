@@ -1,4 +1,4 @@
-package metarules.meta
+// package metarules.meta
 
 /*
   // TODO IMPORTANT: All of the tests in this file are commented out as they
