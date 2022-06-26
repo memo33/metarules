@@ -100,7 +100,7 @@ output, so that you only need to add one of them. (Check for example the
  A Complete Mini-Example
 -------------------------
 
-Open the Main class `src/main/scala/module/Main.scala` and replace the
+Open the Main class [src/main/scala/module/Main.scala](https://github.com/NAMTeam/Network-Addon-Mod/blob/master/src/main/scala/module/Main.scala) and replace the
 definition of `resolve` and `generator` by the following chunk of code:
 
 ```

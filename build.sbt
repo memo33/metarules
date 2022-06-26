@@ -17,11 +17,11 @@ scalacOptions ++= Seq(
   "-encoding", "UTF-8",
   "-target:jvm-1.6")
 
-initialCommands in console := """
+console / initialCommands := """
 import metarules._, meta._
 import Implicits._, Network._, Flag._, Flags._, RotFlip._, Tile.{CopyTile => %}
-implicit val resolve = module.Main.resolve
-def transduce(rule: Rule[Tile]): Unit = RuleTransducer(rule) foreach println
+//implicit val resolve = module.Main.resolve  // requires https://github.com/NAMTeam/Network-Addon-Mod/blob/master/src/main/scala/module/Main.scala
+//def transduce(rule: Rule[Tile]): Unit = RuleTransducer(rule) foreach println
 """
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.5" % "test"
