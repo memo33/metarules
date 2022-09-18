@@ -133,6 +133,13 @@ object Network extends scalaenum.Enum {
   // SAM networks
   val Sam1, Sam2, Sam3, Sam4, Sam5, Sam6, Sam7, Sam8, Sam9, Sam10 =
     new Network(0, Symmetrical, Some(Street), None, None)
+  
+  // RRW networks
+  val L1Dtr = new Network(1, Symmetrical,  Some(Rail), None, None)
+  val L2Dtr = new Network(2, Symmetrical,  Some(Rail), None, None)
+  val Str   = new Network(0, Symmetrical,  Some(Rail), None, None)
+  val L1Str = new Network(1, Symmetrical,  Some(Rail), None, None)
+  val L2Str = new Network(2, Symmetrical,  Some(Rail), None, None)
 
   // network collections
   val BaseNetworks = values.filter(_.base.isEmpty)
