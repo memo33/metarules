@@ -131,15 +131,23 @@ object Network extends scalaenum.Enum {
   val Ave6m = new Network(0, Symmetrical,  Some(Road),       Some(0x3500), None)
 
   // SAM networks
-  val Sam1, Sam2, Sam3, Sam4, Sam5, Sam6, Sam7, Sam8, Sam9, Sam10 =
+  val Sam1, Sam2, Sam3, Sam4, Sam5, Sam6, Sam7, Sam8, Sam9, Sam10, Sam11 =
     new Network(0, Symmetrical, Some(Street), None, None)
-  
+
   // RRW networks
-  val L1Dtr = new Network(1, Symmetrical,  Some(Rail), None, None)
-  val L2Dtr = new Network(2, Symmetrical,  Some(Rail), None, None)
-  val Str   = new Network(0, Symmetrical,  Some(Rail), None, None)
-  val L1Str = new Network(1, Symmetrical,  Some(Rail), None, None)
-  val L2Str = new Network(2, Symmetrical,  Some(Rail), None, None)
+  val L1Dtr    = new Network(1, Symmetrical, Some(Rail), None, None)
+  val L2Dtr    = new Network(2, Symmetrical, Some(Rail), None, None)
+  val L1Str    = new Network(1, Symmetrical, Some(Rail), None, None)
+  val L2Str    = new Network(2, Symmetrical, Some(Rail), None, None)
+  val L1DtrAlt = new Network(1, Symmetrical, Some(Rail), None, None)
+  val L2DtrAlt = new Network(2, Symmetrical, Some(Rail), None, None)
+  val L1StrAlt = new Network(1, Symmetrical, Some(Rail), None, None)
+  val L2StrAlt = new Network(2, Symmetrical, Some(Rail), None, None)
+
+  // HRW networks
+  val Hrw   = new Network(0, Symmetrical, None, None, None)
+  val L1Hrw = new Network(0, Symmetrical, None, None, None)
+  val L2Hrw = new Network(0, Symmetrical, None, None, None)
 
   // network collections
   val BaseNetworks = values.filter(_.base.isEmpty)
