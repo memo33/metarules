@@ -146,8 +146,8 @@ object Network extends scalaenum.Enum {
 
   // HRW networks
   val Hrw   = new Network(0, Symmetrical, None, None, None)
-  val L1Hrw = new Network(0, Symmetrical, None, None, None)
-  val L2Hrw = new Network(0, Symmetrical, None, None, None)
+  val L1Hrw = new Network(1, Symmetrical, None, None, None)
+  val L2Hrw = new Network(2, Symmetrical, None, None, None)
 
   // network collections
   val BaseNetworks = values.filter(_.base.isEmpty)
