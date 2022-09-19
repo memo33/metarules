@@ -2,7 +2,7 @@ name := "metarules"
 
 organization := "com.github.memo33"
 
-version := "0.1.3"
+version := "0.1.4"
 
 licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
 
@@ -18,7 +18,7 @@ scalacOptions ++= Seq(
   "-target:jvm-1.6")
 
 console / initialCommands := """
-import metarules._, meta._
+import metarules._, metarules.meta._
 import Implicits._, Network._, Flag._, Flags._, RotFlip._, Tile.{CopyTile => %}
 //implicit val resolve = module.Main.resolve  // requires https://github.com/NAMTeam/Network-Addon-Mod/blob/master/src/main/scala/module/Main.scala
 //def transduce(rule: Rule[Tile]): Unit = RuleTransducer(rule) foreach println
