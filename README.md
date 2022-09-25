@@ -143,3 +143,12 @@ this is: Pick the first matching `RotFlip` in the sequence
 Also note that listing all the IIDs and rotations explicitly, as in this
 example, is not advisable in general, but should be replaced by a more
 appropriate solution.
+
+
+Creating a Release
+------------------
+
+Bump the version number in `build.sbt`. Then run `sbt publishLocal` and upload the generated artifacts to GitHub.
+(If the version number ends in `-SNAPSHOT`, you can run `sbt publishLocal` locally without uploading anything,
+which is convenient if you make changes to the NAM repository at the same time.
+Once your changes are finalized, you can remove the `-SNAPSHOT` from the version tag.)
