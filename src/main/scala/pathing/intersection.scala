@@ -39,35 +39,6 @@ abstract class Intersection {
     }
   }
 
-  // TODO move somewhere else
-  private def renumberClassNumbers(sc4p: Sc4Path): Sc4Path = {
-    import immutable.Seq
-    val pathToTuple = (p: Path) => (p.transportType, p.entry, p.exit, false)
-    val stopPathToTuple = (p: StopPath) => (p.transportType, p.entry, p.exit, p.uk)
-    val updatePath = (p: Path, i: Int) => p.copy(classNumber = i)
-    val updateStopPath = (p: StopPath, i: Int) => p.copy(classNumber = i)
-    def renumber[A <: PathLike](paths: Seq[A], toTuple: A => (TT, Cardinal, Cardinal, Boolean), updateClass: (A, Int) => A): Seq[A] = {
-      val index = scala.collection.mutable.Map.empty[(TT, Cardinal, Cardinal, Boolean), Int]
-      paths.zipWithIndex.foldLeft(Seq.empty[A]) { case (ps, (p, i)) =>
-        val j = index.getOrElseUpdate(toTuple(p), i)
-        if (i == j) {
-          ps :+ updateClass(p, 0)
-        } else {
-          val q = ps(j)
-          if (q.classNumber == 0) {
-            ps.updated(j, updateClass(q, 1)) :+ updateClass(p, 2)
-          } else {
-            ps :+ updateClass(p, q.classNumber + 1)
-          }
-        }
-      }
-    }
-    val result = sc4p.copy(paths = renumber(sc4p.paths, pathToTuple, updatePath),
-      stopPaths = renumber(sc4p.stopPaths, stopPathToTuple, updateStopPath))
-    assert(result.paths.size == sc4p.paths.size && result.stopPaths.size == sc4p.stopPaths.size)
-    result
-  }
-
   private def buildSc4Path(pss: Seq[(Points, TT)]): Sc4Path = {
     def card(p: Point): Cardinal = {
       require(p.x.abs != 8 || p.y.abs != 8, "corner points not allowed")
@@ -83,7 +54,7 @@ abstract class Intersection {
         entry = card(ps.head), exit = card(ps.last),
         coords = ps.map(pointToCoord)(breakOut))
     } (breakOut)
-    renumberClassNumbers(Sc4Path(paths = paths, terrainVariance = false)) // TODO set terrain variance?
+    Sc4Path(paths = paths, terrainVariance = false).renumberClassNumbers // TODO set terrain variance?
   }
 
   def buildSc4Path: Sc4Path = {
