@@ -62,6 +62,24 @@ is shorthand for
 which is about as compact as it can get, using the current syntax.
 
 
+ Looking up IIDs
+-----------------
+
+If you launch the `sbt console` in the repository
+https://github.com/NAMTeam/Network-Addon-Mod, you can interactively look up
+IIDs for the IID schemes that have already been implemented there.
+For example:
+
+    scala> resolve.lift(Rhw4~NS)
+    res0: Option[metarules.meta.IdTile] = Some(0x57030000,0,0)
+
+    scala> resolve.lift(L1Mis~NS & Rail~NW)
+    res1: Option[metarules.meta.IdTile] = Some(0x57124500,2,1)
+
+    scala> resolve.lift(L1Rhw6c~ES & Rhw6cm~EN)
+    res2: Option[metarules.meta.IdTile] = Some(0x5718B340,1,1)
+
+
  Adding A Custom Code Generator
 --------------------------------
 
