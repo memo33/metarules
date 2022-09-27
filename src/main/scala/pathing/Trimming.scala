@@ -35,7 +35,7 @@ object Trimming {
   /** Filters the subsequences that are inside of the tile
     */
   private[pathing] def pointsInsideTileAt(border: Line, ps: Points): Seq[Points] = {
-    splitAtLine(border, ps).filter(qs => border.side(qs(1)) > 0 || border.side(qs(0)) > 0) // at most one of 0 and 1 might be on the line
+    splitAtLine(border, ps).filter(qs => qs.size > 1 && border.side(qs(1)) > 0 || border.side(qs(0)) > 0) // at most one of 0 and 1 might be on the line
   }
 
   /** Cuts the points to possibly multiple sequences of points that are exactly

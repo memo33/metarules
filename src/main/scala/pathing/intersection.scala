@@ -14,6 +14,12 @@ abstract class Connection
 case class CurvedConnection(from: Line, start: Line, to: Line, end: Line) extends Connection
 case class StraightConnection(line: Line) extends Connection
 
+/* line     - the straight travel direction
+ * stopLine - the line at which to stop (intersection point with line is the stop point)
+ * uk       - flag
+ */
+case class ConnectionStop(line: Line, stopLine: Line, uk: Boolean)
+
 abstract class Intersection {
 
   val MinDist = 0.5 // half a meter
@@ -21,8 +27,7 @@ abstract class Intersection {
 
   def yieldConnections(tt: TT): TraversableOnce[Connection]
 
-  // TODO implement stop points
-  //def yieldStopPoints: TraversableOnce[(Point, Cardinal, TT)]
+  def yieldConnectionStops(tt: TT): TraversableOnce[ConnectionStop]
 
   /** Calculates the points of a curve with a straight start and end section.
     */
@@ -39,7 +44,11 @@ abstract class Intersection {
     }
   }
 
-  private def buildSc4Path(pss: Seq[(Points, TT)]): Sc4Path = {
+  /** format of stop points:
+    *   Line(entry point, stop point) if uk=false
+    *   Line(stop point, exit point) if uk=true
+    */
+  private def buildSc4Path(pss: Seq[(Points, TT)], stopPoints: Seq[(Line, TT, Boolean)]): Sc4Path = {
     def card(p: Point): Cardinal = {
       require(p.x.abs != 8 || p.y.abs != 8, "corner points not allowed")
       p match {
@@ -54,7 +63,13 @@ abstract class Intersection {
         entry = card(ps.head), exit = card(ps.last),
         coords = ps.map(pointToCoord)(breakOut))
     } (breakOut)
-    Sc4Path(paths = paths, terrainVariance = false).renumberClassNumbers // TODO set terrain variance?
+    val stopPaths: immutable.Seq[StopPath] = stopPoints.map { case (Line(a, b), tt, uk) =>
+      StopPath(comment = None, transportType = tt, classNumber = 0, uk = uk,
+        entry = if (uk) card(b) else card(a),
+        exit = Cardinal.Special,
+        coord = if (uk) a else b)
+    } (breakOut)
+    Sc4Path(paths = paths, stopPaths = stopPaths, terrainVariance = false).renumberClassNumbers // TODO set terrain variance?
   }
 
   def buildSc4Path: Sc4Path = {
@@ -66,7 +81,18 @@ abstract class Intersection {
           Trimming.trimToTile(Seq(line.p1, line.p2))
       } map ((_, tt))
     }
-    buildSc4Path(pss)
+    val stopPoints: Seq[(Line, TT, Boolean)] = TT.values.toSeq.flatMap { tt =>
+      yieldConnectionStops(tt).toSeq flatMap {
+        case ConnectionStop(line, stopLine, uk) => {
+          val interruptedLine = if (!uk) Seq(line.p1, line intersect stopLine) else Seq(line intersect stopLine, line.p2)
+          Trimming.trimToTile(interruptedLine) map { qs =>
+            require(qs.size == 2, "stop points should not be on tile boundary")
+            (Line(qs(0), qs(1)), tt, uk)
+          }
+        }
+      }
+    }
+    buildSc4Path(pss, stopPoints)
   }
 
 }

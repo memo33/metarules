@@ -24,5 +24,14 @@ class TrimmingSpec extends WordSpec with Matchers {
       val c = Seq(Point(8,6,0), Point(6,6,0), Point(6,0,0), Point(8,0,0))
       trimToTile(ps) should be (Seq(a, b, c))
     }
+    "handle paths ending inside the tile" in {
+      val ps = Seq(Point(4,0,0), Point(12,4,0))
+      trimToTile(ps) should be (Seq(Seq(Point(4,0,0), Point(8,2,0))))
+      trimToTile(ps.reverse) should be (Seq(Seq(Point(8,2,0), Point(4,0,0))))
+      val qs = Seq(Point(10,0,0), Point(12,4,0))
+      trimToTile(qs) should be (Seq())
+      val rs = Seq(Point(8,0,0), Point(12,4,0))
+      trimToTile(rs) should be (Seq())  // degenerate case (can arise in stop path construction and might miss some stop points)
+    }
   }
 }
