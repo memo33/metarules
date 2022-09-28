@@ -11,14 +11,14 @@ abstract class Connection
   * to    - the to-direction
   * end   - the line that deterimens the end point of the curve when crossed with to
   */
-case class CurvedConnection(from: Line, start: Line, to: Line, end: Line) extends Connection
-case class StraightConnection(line: Line) extends Connection
+case class CurvedConnection(from: Line, start: Line, to: Line, end: Line, classNumber: Int) extends Connection
+case class StraightConnection(line: Line, classNumber: Int) extends Connection
 
 /* line     - the straight travel direction
  * stopLine - the line at which to stop (intersection point with line is the stop point)
  * uk       - flag
  */
-case class ConnectionStop(line: Line, stopLine: Line, uk: Boolean)
+case class ConnectionStop(line: Line, stopLine: Line, classNumber: Int, uk: Boolean)
 
 abstract class Intersection {
 
@@ -48,7 +48,7 @@ abstract class Intersection {
     *   Line(entry point, stop point) if uk=false
     *   Line(stop point, exit point) if uk=true
     */
-  private def buildSc4Path(pss: Seq[(Points, TT)], stopPoints: Seq[(Line, TT, Boolean)]): Sc4Path = {
+  private def buildSc4Path(pss: Seq[(Points, TT, Int)], stopPoints: Seq[(Line, TT, Int, Boolean)]): Sc4Path = {
     def card(p: Point): Cardinal = {
       require(p.x.abs != 8 || p.y.abs != 8, "corner points not allowed")
       p match {
@@ -58,36 +58,36 @@ abstract class Intersection {
         case Point(_,-8,_) => South
       }
     }
-    val paths: immutable.Seq[Path] = pss.map { case (ps, tt) =>
-      Path(comment = None, transportType = tt, classNumber = 0,
+    val paths: immutable.Seq[Path] = pss.map { case (ps, tt, cn) =>
+      Path(comment = None, transportType = tt, classNumber = cn,
         entry = card(ps.head), exit = card(ps.last),
         coords = ps.map(pointToCoord)(breakOut))
     } (breakOut)
-    val stopPaths: immutable.Seq[StopPath] = stopPoints.map { case (Line(a, b), tt, uk) =>
-      StopPath(comment = None, transportType = tt, classNumber = 0, uk = uk,
+    val stopPaths: immutable.Seq[StopPath] = stopPoints.map { case (Line(a, b), tt, cn, uk) =>
+      StopPath(comment = None, transportType = tt, classNumber = cn, uk = uk,
         entry = if (uk) card(b) else card(a),
         exit = Cardinal.Special,
         coord = if (uk) a else b)
     } (breakOut)
-    Sc4Path(paths = paths, stopPaths = stopPaths, terrainVariance = false).renumberClassNumbers // TODO set terrain variance?
+    Sc4Path(paths = paths, stopPaths = stopPaths, terrainVariance = false) // TODO set terrain variance?
   }
 
   def buildSc4Path: Sc4Path = {
-    val pss: Seq[(Points, TT)] = TT.values.toSeq.flatMap { tt =>
+    val pss: Seq[(Points, TT, Int)] = TT.values.toSeq.flatMap { tt =>
       yieldConnections(tt).toSeq flatMap {
-        case CurvedConnection(from, start, to, end) =>
-          Trimming.trimToTile(drawCurve(from.p1, from intersect start, to intersect end, to.p2))
-        case StraightConnection(line) =>
-          Trimming.trimToTile(Seq(line.p1, line.p2))
-      } map ((_, tt))
+        case CurvedConnection(from, start, to, end, cn) =>
+          Trimming.trimToTile(drawCurve(from.p1, from intersect start, to intersect end, to.p2)).map((_, tt, cn))
+        case StraightConnection(line, cn) =>
+          Trimming.trimToTile(Seq(line.p1, line.p2)).map((_, tt, cn))
+      }
     }
-    val stopPoints: Seq[(Line, TT, Boolean)] = TT.values.toSeq.flatMap { tt =>
+    val stopPoints: Seq[(Line, TT, Int, Boolean)] = TT.values.toSeq.flatMap { tt =>
       yieldConnectionStops(tt).toSeq flatMap {
-        case ConnectionStop(line, stopLine, uk) => {
+        case ConnectionStop(line, stopLine, cn, uk) => {
           val interruptedLine = if (!uk) Seq(line.p1, line intersect stopLine) else Seq(line intersect stopLine, line.p2)
           Trimming.trimToTile(interruptedLine) map { qs =>
             require(qs.size == 2, "stop points should not be on tile boundary")
-            (Line(qs(0), qs(1)), tt, uk)
+            (Line(qs(0), qs(1)), tt, cn, uk)
           }
         }
       }
