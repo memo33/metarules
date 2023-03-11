@@ -33,7 +33,7 @@ import Tile.{projectLeft, projectRight}
 object RuleTransducer {
 
   private[meta] def tileToIdSymTile(t: Tile)(implicit resolve: IdResolver): IdSymTile =
-    new IdSymTile(t, resolve(t))
+    new IdSymTile(t.symmetries, resolve(t))
 
   def apply(rule: Rule[Tile])(implicit resolve: IdResolver): TraversableOnce[Rule[IdTile]] = {
     multiplyTla(rule).flatMap(rule => createRules(rule map tileToIdSymTile))

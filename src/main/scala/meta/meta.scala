@@ -123,9 +123,18 @@ case class IdTile(id: Int, rf: RotFlip, mappedRepr: QuotientGroup => Set[RotFlip
   }
   override def hashCode: Int = id ^ rf.hashCode
 }
+object IdTile {
+  /** This constructor can be used to connect metarule syntax to ordinary RUL2 code.
+    */
+  def apply(id: Int, rf: RotFlip, symmetries: SymGroup): IdSymTile = {
+    new IdSymTile(symmetries, IdTile(id, rf))
+  }
+  def apply(id: Int, rf: RotFlip, symmetries: SymGroup, mappedRepr: QuotientGroup => Set[RotFlip]): IdSymTile = {
+    new IdSymTile(symmetries, IdTile(id, rf, mappedRepr))
+  }
+}
 
-private[meta] class IdSymTile(symTile: SymTile, idTile: IdTile) extends SymTile {
-  def symmetries: SymGroup = symTile.symmetries
+private[meta] class IdSymTile(val symmetries: SymGroup, idTile: IdTile) extends SymTile {
   def id: Int = idTile.id
   def rf: RotFlip = idTile.rf
   def repr: Set[RotFlip] = idTile.mappedRepr(symmetries.quotient)
