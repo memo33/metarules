@@ -42,7 +42,7 @@ private[meta] case class TupleCoupleSegment(cseg1: CoupleSegment, cseg2: CoupleS
 
 private[meta] sealed trait TileLike
 
-private[meta] sealed trait SymTile extends TileLike {
+sealed trait SymTile extends TileLike {
   def symmetries: SymGroup
   def representations: QuotientGroup = symmetries.quotient
 }
@@ -65,21 +65,40 @@ case class Tile(segs: Set[Segment]) extends SymTile {
   def | (that: CoupleTile): Rule[Tile] = Rule(this, that.tile1, this, that.tile2)
   def | (that: TupleCoupleTile): (Rule[Tile], Rule[Tile]) = (this | that.ctile1, this | that.ctile2)
   def | (cs: CoupleSegment): Rule[Tile] = this | Implicits.coupleSegmentToCoupleTile(cs)
+  def | (that: IdSymTile): Rule.PartialRule2[SymTile, Rule[SymTile]] = {
+    val b = Rule.newBuilder[SymTile]
+    b += this
+    b += that
+    new Rule.PartialRule2(b)
+  }
   override def toString = segs.mkString(" & ")
 }
 
-private[meta] case class TupleTile(tile1: Tile, tile2: Tile) extends TileLike {
+trait TupleTileLike[A] extends TileLike {
+  def tile1: A
+  def tile2: A
+}
+
+private[meta] case class TupleSymTile(tile1: SymTile, tile2: SymTile) extends TupleTileLike[SymTile]
+
+private[meta] case class TupleTile(tile1: Tile, tile2: Tile) extends TupleTileLike[Tile] {
   def & (seg: Segment) = copy(tile1 = tile1 & seg, tile2 = tile2 & seg)
   def & (tseg: TupleSegment) = copy(tile1 = tile1 & tseg.seg1, tile2 = tile2 & tseg.seg2)
   def & (cseg: CoupleSegment): TupleCoupleTile = TupleCoupleTile(tile1 & cseg, tile2 & cseg)
   def & (tcs: TupleCoupleSegment): TupleCoupleTile = TupleCoupleTile(tile1 & tcs.cseg1, tile2 & tcs.cseg2)
   def | (that: TupleTile): Rule.PartialRule2[TupleTile, (Rule[Tile], Rule[Tile])] = {
-    val b = new Rule.TupleRuleBuilder()
+    val b = new Rule.TupleRuleBuilder[Tile, TupleTile]()
     b += this
     b += that
     new Rule.PartialRule2(b)
   }
   def | (that: TupleCoupleTile): (Rule[Tile], Rule[Tile]) = Implicits.tupleTileToTupleCoupleTile(this) | that
+  def | (that: IdSymTile): Rule.PartialRule2[TupleSymTile, (Rule[SymTile], Rule[SymTile])] = {
+    val b = new Rule.TupleRuleBuilder[SymTile, TupleSymTile]
+    b += TupleSymTile(tile1, tile2)
+    b += TupleSymTile(that, that)
+    new Rule.PartialRule2(b)
+  }
 }
 
 private[meta] case class CoupleTile(tile1: Tile, tile2: Tile) extends TileLike {
@@ -91,6 +110,7 @@ private[meta] case class CoupleTile(tile1: Tile, tile2: Tile) extends TileLike {
   def | (that: CoupleTile): Rule[Tile] = Rule(this.tile1, that.tile1, this.tile2, that.tile2)
   def | (that: TupleCoupleTile): (Rule[Tile], Rule[Tile]) = Implicits.coupleTileToTupleCoupleTile(this) | that
   def | (cs: CoupleSegment): Rule[Tile] = this | Implicits.coupleSegmentToCoupleTile(cs)
+  def | (that: IdSymTile): Rule[SymTile] = Rule(this.tile1, that, this.tile2, that)
 }
 
 private[meta] case class TupleCoupleTile(ctile1: CoupleTile, ctile2: CoupleTile) extends TileLike {
@@ -99,6 +119,7 @@ private[meta] case class TupleCoupleTile(ctile1: CoupleTile, ctile2: CoupleTile)
   def & (ts: TupleSegment) = copy(ctile1 = ctile1 & ts.seg1, ctile2 = ctile2 & ts.seg2)
   def & (tcs: TupleCoupleSegment) = copy(ctile1 = ctile1 & tcs.cseg1, ctile2 = ctile2 & tcs.cseg2)
   def | (that: TupleCoupleTile): (Rule[Tile], Rule[Tile]) = (this.ctile1 | that.ctile1, this.ctile2 | that.ctile2)
+  def | (that: IdSymTile): (Rule[SymTile], Rule[SymTile]) = (this.ctile1 | that, this.ctile2 | that)
 }
 
 object Tile {
@@ -138,6 +159,23 @@ private[meta] class IdSymTile(val symmetries: SymGroup, idTile: IdTile) extends 
   def id: Int = idTile.id
   def rf: RotFlip = idTile.rf
   def repr: Set[RotFlip] = idTile.mappedRepr(symmetries.quotient)
+  override def toString = s"$idTile[${symmetries.name}]"
+
+  def | (that: Tile): Rule.PartialRule2[SymTile, Rule[SymTile]] = {
+    val b = Rule.newBuilder[SymTile]
+    b += this
+    b += that
+    new Rule.PartialRule2(b)
+  }
+  def | (that: TupleTile): Rule.PartialRule2[TupleSymTile, (Rule[SymTile], Rule[SymTile])] = {
+    val b = new Rule.TupleRuleBuilder[SymTile, TupleSymTile]
+    b += TupleSymTile(this, this)
+    b += TupleSymTile(that.tile1, that.tile2)
+    new Rule.PartialRule2(b)
+  }
+  def | (that: CoupleTile): Rule[SymTile] = Rule(this, that.tile1, this, that.tile2)
+  def | (that: TupleCoupleTile): (Rule[SymTile], Rule[SymTile]) = (this | that.ctile1, this | that.ctile2)
+  def | (cs: CoupleSegment): Rule[SymTile] = this | Implicits.coupleSegmentToCoupleTile(cs)
 }
 
 
@@ -177,8 +215,9 @@ object Rule {
     def result(): Rule[B] = new Rule(arr)
   }
 
-  private[meta] class TupleRuleBuilder() extends RuleBuilderLike[TupleTile, (Rule[Tile], Rule[Tile])] {
-    def result(): (Rule[Tile], Rule[Tile]) = {
+  // A = Tile, B = TupleTile or A = SymTile, B = TupleSymTile
+  private[meta] class TupleRuleBuilder[A <: TileLike : ClassTag, B <: TupleTileLike[A] : ClassTag]() extends RuleBuilderLike[B, (Rule[A], Rule[A])] {
+    def result(): (Rule[A], Rule[A]) = {
       (Rule(arr(0).tile1, arr(1).tile1, arr(2).tile1, arr(3).tile1), Rule(arr(0).tile2, arr(1).tile2, arr(2).tile2, arr(3).tile2))
     }
   }
