@@ -4,7 +4,6 @@ import RotFlip._
 import Group.SymGroup
 import Implicits._
 import Network._
-import Tile.{projectLeft, projectRight}
 
 /** The main logic to translate meta code (`Rule[Tile]`) to proper RUL2 code
   * (`Rule[IdTile]`). The crux of that is that a single meta rule can result in
@@ -32,11 +31,8 @@ import Tile.{projectLeft, projectRight}
   */
 object RuleTransducer {
 
-  private[meta] def tileToIdSymTile(t: Tile)(implicit resolve: IdResolver): IdSymTile =
-    new IdSymTile(t.symmetries, resolve(t))
-
-  def apply(rule: Rule[Tile])(implicit resolve: IdResolver): TraversableOnce[Rule[IdTile]] = {
-    multiplyTla(rule).flatMap(rule => createRules(rule map tileToIdSymTile))
+  def apply(rule: Rule[SymTile])(implicit resolve: IdResolver): TraversableOnce[Rule[IdTile]] = {
+    multiplyTla(rule).flatMap(rule => createRules(rule.map(_.toIdSymTile)))
   }
 
   /** Tests whether the orientation of the two tiles can occur according to
@@ -132,14 +128,13 @@ object RuleTransducer {
     result
   }
 
-  private[meta] def multiplyTla(rule: Rule[Tile]): TraversableOnce[Rule[Tile]] = {
-    if (!rule.exists(_.segs.exists(_.network.isTla))) {
+  private[meta] def multiplyTla(rule: Rule[SymTile]): TraversableOnce[Rule[SymTile]] = {
+    if (!rule.exists(_.containsTlaFlags)) {
       Iterator(rule)
-    } else if (rule.forall(t => t.segs.forall(!_.network.isTla) ||
-        !t.symmetries.quotient.exists(_.flipped))) {
-      Iterator(rule map projectLeft)
+    } else if (rule.forall(_.shouldOnlyProjectLeft)) {
+      Iterator(rule.map(_.projectLeft))
     } else {
-      Iterator(rule map projectLeft, rule map projectRight)
+      Iterator(rule.map(_.projectLeft), rule.map(_.projectRight))
     }
   }
 }

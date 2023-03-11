@@ -29,8 +29,8 @@ trait RuleGenerator {
   def start(): Unit
 }
 
-private[meta] class RulesBuffer extends scala.collection.mutable.ArrayBuffer[Rule[Tile]] {
-  def += (rules: (Rule[Tile], Rule[Tile])): this.type = {
+private[meta] class RulesBuffer extends scala.collection.mutable.ArrayBuffer[Rule[SymTile]] {
+  def += (rules: (Rule[SymTile], Rule[SymTile])): this.type = {
     this += rules._1
     this += rules._2
   }

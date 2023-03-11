@@ -45,6 +45,12 @@ private[meta] sealed trait TileLike
 sealed trait SymTile extends TileLike {
   def symmetries: SymGroup
   def representations: QuotientGroup = symmetries.quotient
+
+  def toIdSymTile(implicit resolve: IdResolver): IdSymTile
+  private[meta] def containsTlaFlags: Boolean = false
+  private[meta] def shouldOnlyProjectLeft: Boolean = true
+  private[meta] def projectLeft: SymTile = this
+  private[meta] def projectRight: SymTile = this
 }
 
 case class Tile(segs: Set[Segment]) extends SymTile {
@@ -72,6 +78,12 @@ case class Tile(segs: Set[Segment]) extends SymTile {
     new Rule.PartialRule2(b)
   }
   override def toString = segs.mkString(" & ")
+
+  def toIdSymTile(implicit resolve: IdResolver) = new IdSymTile(symmetries, resolve(this))
+  override private[meta] def containsTlaFlags: Boolean = segs.exists(_.network.isTla)
+  override private[meta] def shouldOnlyProjectLeft: Boolean = segs.forall(!_.network.isTla) || !symmetries.quotient.exists(_.flipped)
+  override private[meta] def projectLeft: SymTile = Tile.projectLeft(this)
+  override private[meta] def projectRight: SymTile = Tile.projectRight(this)
 }
 
 trait TupleTileLike[A] extends TileLike {
@@ -176,6 +188,8 @@ private[meta] class IdSymTile(val symmetries: SymGroup, idTile: IdTile) extends 
   def | (that: CoupleTile): Rule[SymTile] = Rule(this, that.tile1, this, that.tile2)
   def | (that: TupleCoupleTile): (Rule[SymTile], Rule[SymTile]) = (this | that.ctile1, this | that.ctile2)
   def | (cs: CoupleSegment): Rule[SymTile] = this | Implicits.coupleSegmentToCoupleTile(cs)
+
+  def toIdSymTile(implicit resolve: IdResolver): this.type = this
 }
 
 
