@@ -94,6 +94,19 @@ class metaSpec extends WordSpec with Matchers {
       ((Road ~> Road)~WE & Rail~NS | it)  // : Rule[SymTile]
       ((Road ~> Road)~WE & Rail~NS~SN | it)  // : TR
       ((Road ~> Road)~WE~EW & Rail~NS | it)  // : TR
+
+      (it | it | it | it)
+      (it | it | % | it)
+      (it | it | it | %)
+      (it | it | it | Road~EW)
+      (it | it | Road~EW | it)
+      (it | it | Road~EW | Road~EW)
+      (it | Road~EW | it | it)
+      (Road~EW~WE | it | it | it)
+      (Road~EW | Road~EW & Rail~NS | it | it)
+      (Road~EW | Road~EW | it | it)
+      (Road~EW | Road~EW | it | Road~EW)
+      (Road~EW | Road~EW | Road~EW | it)
     }
   }
 

@@ -179,6 +179,12 @@ private[meta] class IdSymTile(val symmetries: SymGroup, idTile: IdTile) extends 
     b += that
     new Rule.PartialRule2(b)
   }
+  def | (that: IdSymTile): Rule.PartialRule2[SymTile, Rule[SymTile]] = {
+    val b = Rule.newBuilder[SymTile]
+    b += this
+    b += that
+    new Rule.PartialRule2(b)
+  }
   def | (that: TupleTile): Rule.PartialRule2[TupleSymTile, (Rule[SymTile], Rule[SymTile])] = {
     val b = new Rule.TupleRuleBuilder[SymTile, TupleSymTile]
     b += TupleSymTile(this, this)
