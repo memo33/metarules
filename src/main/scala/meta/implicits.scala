@@ -13,7 +13,7 @@ object Implicits extends LowPriorityImplicits {
   implicit def tupleCoupleSegmentToTupleCoupleTile(tcs: TupleCoupleSegment): TupleCoupleTile = TupleCoupleTile(tcs.cseg1, tcs.cseg2)
   implicit def tileToTupleCoupleTile(tile: Tile): TupleCoupleTile = TupleCoupleTile(tile, tile)
   implicit def tupleTileToTupleCoupleTile(tt: TupleTile): TupleCoupleTile = TupleCoupleTile(tt.tile1, tt.tile2)
-//  implicit def coupleTileToTupleCoupleTile(ct: CoupleTile): TupleCoupleTile = TupleCoupleTile(ct, ct)
+  implicit def coupleTileToTupleCoupleTile(ct: CoupleTile): TupleCoupleTile = TupleCoupleTile(ct, ct)
   implicit def segmentToTupleSegment(seg: Segment): TupleSegment = TupleSegment(seg, seg)
 }
 
@@ -22,7 +22,6 @@ trait LowPriorityImplicits {
   implicit def segmentToTupleTile(seg: Segment): TupleTile = Implicits.tileToTupleTile(Implicits.segmentToTile(seg))
   implicit def segmentToCoupleTile(seg: Segment): CoupleTile = Implicits.tileToCoupleTile(Implicits.segmentToTile(seg))
   implicit def segmentToTupleCoupleTile(seg: Segment): TupleCoupleTile = Implicits.tileToTupleCoupleTile(Implicits.segmentToTile(seg))
-  def coupleTileToTupleCoupleTile(ct: CoupleTile): TupleCoupleTile = TupleCoupleTile(ct, ct)
-  implicit def coupleSegmentToTupleCoupleTile(cs: CoupleSegment): TupleCoupleTile = coupleTileToTupleCoupleTile(Implicits.coupleSegmentToCoupleTile(cs))
+  implicit def coupleSegmentToTupleCoupleTile(cs: CoupleSegment): TupleCoupleTile = Implicits.coupleTileToTupleCoupleTile(Implicits.coupleSegmentToCoupleTile(cs))
   implicit def tupleSegmentToTupleCoupleTile(ts: TupleSegment): TupleCoupleTile = Implicits.tupleTileToTupleCoupleTile(Implicits.tupleSegmentToTupleTile(ts))
 }

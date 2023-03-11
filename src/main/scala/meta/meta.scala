@@ -90,6 +90,7 @@ private[meta] case class CoupleTile(tile1: Tile, tile2: Tile) extends TileLike {
   def | (that: Tile): Rule[Tile] = Rule(this.tile1, that, this.tile2, that)
   def | (that: CoupleTile): Rule[Tile] = Rule(this.tile1, that.tile1, this.tile2, that.tile2)
   def | (that: TupleCoupleTile): (Rule[Tile], Rule[Tile]) = Implicits.coupleTileToTupleCoupleTile(this) | that
+  def | (cs: CoupleSegment): Rule[Tile] = this | Implicits.coupleSegmentToCoupleTile(cs)
 }
 
 private[meta] case class TupleCoupleTile(ctile1: CoupleTile, ctile2: CoupleTile) extends TileLike {

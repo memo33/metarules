@@ -9,51 +9,51 @@ class metaSpec extends WordSpec with Matchers {
       import Flags._, Network._, Implicits._
       def % = Tile.CopyTile
       type TR = (Rule[Tile], Rule[Tile]) // tuple rule
-      (Road~WE | Road~WE | % | Road~WE): Rule[Tile]
-      (Road~WE~EW | Road~WE | % | Road~WE): TR
-      (Road~WE~EW & Rail~NS | Road~WE | % | Road~WE): TR
-      (Road~WE & Rail~NS~SN | Road~WE | % | Road~WE): TR
-      (Road~WE~EW & Rail~NS~SN | Road~WE | % | Road~WE): TR
-      (Road~WE | Road~WE~EW | % | Road~WE~EW): TR
-      (Road~WE | Road~WE~EW & Rail~NS | % | Road~WE~EW): TR
-      (Road~WE | Road~WE & Rail~NS~SN | % | Road~WE~EW): TR
-      (Road~WE | Road~WE~EW & Rail~NS~SN | % | Road~WE~EW): TR
-      (Road~WE & Rail~NS~SN | Road~WE~EW & Rail~NS~SN | % | Road~WE~EW): TR
-      (Road~WE~EW & Rail~NS | Road~WE~EW & Rail~NS~SN | % | Road~WE~EW): TR
+      (Road~WE | Road~WE | % | Road~WE)  // : Rule[Tile]
+      (Road~WE~EW | Road~WE | % | Road~WE)  // : TR
+      (Road~WE~EW & Rail~NS | Road~WE | % | Road~WE)  // : TR
+      (Road~WE & Rail~NS~SN | Road~WE | % | Road~WE)  // : TR
+      (Road~WE~EW & Rail~NS~SN | Road~WE | % | Road~WE)  // : TR
+      (Road~WE | Road~WE~EW | % | Road~WE~EW)  // : TR
+      (Road~WE | Road~WE~EW & Rail~NS | % | Road~WE~EW)  // : TR
+      (Road~WE | Road~WE & Rail~NS~SN | % | Road~WE~EW)  // : TR
+      (Road~WE | Road~WE~EW & Rail~NS~SN | % | Road~WE~EW)  // : TR
+      (Road~WE & Rail~NS~SN | Road~WE~EW & Rail~NS~SN | % | Road~WE~EW)  // : TR
+      (Road~WE~EW & Rail~NS | Road~WE~EW & Rail~NS~SN | % | Road~WE~EW)  // : TR
 
-      (Road~WE | (Road ~> Street)~WE): Rule[Tile]
-      (Road~WE | (Road ~> Street)~WE & Rail~NS): Rule[Tile]
-      (Road~WE | (Road ~> Street)~WE & (Rail ~> Lightrail)~NS): Rule[Tile]
-      (Road~WE | Road~WE & (Rail ~> Lightrail)~NS): Rule[Tile]
-      (Road~WE & Rail~NS | (Road ~> Street)~WE): Rule[Tile]
-      (Road~WE & Rail~NS | (Road ~> Street)~WE & Rail~NS): Rule[Tile]
-      (Road~WE & Rail~NS | (Road ~> Street)~WE & (Rail ~> Lightrail)~NS): Rule[Tile]
-      (Road~WE & Rail~NS | Road~WE & (Rail ~> Lightrail)~NS): Rule[Tile]
-      ((Road ~> Street)~WE | Road~WE): Rule[Tile]
-      ((Road ~> Street)~WE & Rail~NS | Road~WE): Rule[Tile]
-      ((Road ~> Street)~WE & (Rail ~> Lightrail)~NS | Road~WE): Rule[Tile]
-      (Road~WE & (Rail ~> Lightrail)~NS | Road~WE): Rule[Tile]
-      ((Road ~> Street)~WE | (Road ~> Street)~WE): Rule[Tile]
-      ((Road ~> Street)~WE & Rail~NS | (Road ~> Street)~WE): Rule[Tile]
-      ((Road ~> Street)~WE & (Rail ~> Lightrail)~NS | (Road ~> Street)~WE): Rule[Tile]
-      (Road~WE & (Rail ~> Lightrail)~NS | (Road ~> Street)~WE): Rule[Tile]
+      (Road~WE | (Road ~> Street)~WE)  // : Rule[Tile]
+      (Road~WE | (Road ~> Street)~WE & Rail~NS)  // : Rule[Tile]
+      (Road~WE | (Road ~> Street)~WE & (Rail ~> Lightrail)~NS)  // : Rule[Tile]
+      (Road~WE | Road~WE & (Rail ~> Lightrail)~NS)  // : Rule[Tile]
+      (Road~WE & Rail~NS | (Road ~> Street)~WE)  // : Rule[Tile]
+      (Road~WE & Rail~NS | (Road ~> Street)~WE & Rail~NS)  // : Rule[Tile]
+      (Road~WE & Rail~NS | (Road ~> Street)~WE & (Rail ~> Lightrail)~NS)  // : Rule[Tile]
+      (Road~WE & Rail~NS | Road~WE & (Rail ~> Lightrail)~NS)  // : Rule[Tile]
+      ((Road ~> Street)~WE | Road~WE)  // : Rule[Tile]
+      ((Road ~> Street)~WE & Rail~NS | Road~WE)  // : Rule[Tile]
+      ((Road ~> Street)~WE & (Rail ~> Lightrail)~NS | Road~WE)  // : Rule[Tile]
+      (Road~WE & (Rail ~> Lightrail)~NS | Road~WE)  // : Rule[Tile]
+      ((Road ~> Street)~WE | (Road ~> Street)~WE)  // : Rule[Tile]
+      ((Road ~> Street)~WE & Rail~NS | (Road ~> Street)~WE)  // : Rule[Tile]
+      ((Road ~> Street)~WE & (Rail ~> Lightrail)~NS | (Road ~> Street)~WE)  // : Rule[Tile]
+      (Road~WE & (Rail ~> Lightrail)~NS | (Road ~> Street)~WE)  // : Rule[Tile]
 
-      (Road~WE | (Road ~> Street)~WE~EW): TR
-      (Road~WE | (Road ~> Street)~WE & Rail~NS~SN): TR
-      (Road~WE | (Road ~> Street)~WE & (Rail ~> Lightrail)~NS~SN): TR
-      (Road~WE | Road~WE~EW & (Rail ~> Lightrail)~NS): TR
-      (Road~WE & Rail~NS~SN | (Road ~> Street)~WE): TR
-      (Road~WE~EW & Rail~NS | (Road ~> Street)~WE & Rail~NS): TR
-      (Road~WE & Rail~NS | (Road ~> Street)~WE & (Rail ~> Lightrail)~NS~SN): TR
-      (Road~WE & Rail~NS | Road~WE~EW & (Rail ~> Lightrail)~NS): TR
-      ((Road ~> Street)~WE | Road~WE~EW & Rail~NS): TR
-      ((Road ~> Street)~WE & Rail~NS~SN | Road~WE): TR
-      ((Road ~> Street)~WE & (Rail ~> Lightrail)~NS | Road~WE~EW): TR
-      (Road~WE~EW & (Rail ~> Lightrail)~NS | Road~WE): TR
-      ((Road ~> Street)~WE~EW | (Road ~> Street)~WE): TR
-      ((Road ~> Street)~WE & Rail~NS | (Road ~> Street)~WE~EW): TR
-      ((Road ~> Street)~WE & (Rail ~> Lightrail)~NS~SN | (Road ~> Street)~WE): TR
-      (Road~WE~EW & (Rail ~> Lightrail)~NS | (Road ~> Street)~WE): TR
+      (Road~WE | (Road ~> Street)~WE~EW)  // : TR
+      (Road~WE | (Road ~> Street)~WE & Rail~NS~SN)  // : TR
+      (Road~WE | (Road ~> Street)~WE & (Rail ~> Lightrail)~NS~SN)  // : TR
+      (Road~WE | Road~WE~EW & (Rail ~> Lightrail)~NS)  // : TR
+      (Road~WE & Rail~NS~SN | (Road ~> Street)~WE)  // : TR
+      (Road~WE~EW & Rail~NS | (Road ~> Street)~WE & Rail~NS)  // : TR
+      (Road~WE & Rail~NS | (Road ~> Street)~WE & (Rail ~> Lightrail)~NS~SN)  // : TR
+      (Road~WE & Rail~NS | Road~WE~EW & (Rail ~> Lightrail)~NS)  // : TR
+      ((Road ~> Street)~WE | Road~WE~EW & Rail~NS)  // : TR
+      ((Road ~> Street)~WE & Rail~NS~SN | Road~WE)  // : TR
+      ((Road ~> Street)~WE & (Rail ~> Lightrail)~NS | Road~WE~EW)  // : TR
+      (Road~WE~EW & (Rail ~> Lightrail)~NS | Road~WE)  // : TR
+      ((Road ~> Street)~WE~EW | (Road ~> Street)~WE)  // : TR
+      ((Road ~> Street)~WE & Rail~NS | (Road ~> Street)~WE~EW)  // : TR
+      ((Road ~> Street)~WE & (Rail ~> Lightrail)~NS~SN | (Road ~> Street)~WE)  // : TR
+      (Road~WE~EW & (Rail ~> Lightrail)~NS | (Road ~> Street)~WE)  // : TR
     }
   }
 
