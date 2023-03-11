@@ -170,6 +170,8 @@ private[meta] class IdSymTile(val symmetries: SymGroup, idTile: IdTile) extends 
   def repr: Set[RotFlip] = idTile.mappedRepr(symmetries.quotient)
   override def toString = s"$idTile[${symmetries.name}]"
 
+  def * (rf: RotFlip) = new IdSymTile(symmetries * rf, idTile * rf)
+
   def | (that: Tile): Rule.PartialRule2[SymTile, Rule[SymTile]] = {
     new Rule.PartialRule2(Rule.newBuilder[SymTile] += this += that)
   }
