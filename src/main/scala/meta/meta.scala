@@ -153,6 +153,15 @@ object IdTile {
   def apply(id: Int, rf: RotFlip, symmetries: SymGroup, mappedRepr: QuotientGroup => Set[RotFlip]): IdSymTile = {
     new IdSymTile(symmetries, IdTile(id, rf, mappedRepr))
   }
+  def apply(idTile: IdTile, symmetries: SymGroup): IdSymTile = {
+    new IdSymTile(symmetries, idTile)
+  }
+  def apply(id: Int, rot: Int, flip: Int, symmetries: SymGroup): IdSymTile = {
+    new IdSymTile(symmetries, IdTile(id, RotFlip(rot, flip)))
+  }
+  def apply(id: Int, rot: Int, flip: Int): IdTile = {
+    IdTile(id, RotFlip(rot, flip))
+  }
 }
 
 private[meta] class IdSymTile(val symmetries: SymGroup, idTile: IdTile) extends SymTile {
