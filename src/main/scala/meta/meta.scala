@@ -61,10 +61,7 @@ case class Tile(segs: Set[Segment]) extends SymTile {
   def & (cseg: CoupleSegment): CoupleTile = CoupleTile(this & cseg.seg1, this & cseg.seg2)
   def & (tcseg: TupleCoupleSegment): TupleCoupleTile = TupleCoupleTile(this & tcseg.cseg1, this & tcseg.cseg2)
   def | (that: Tile): Rule.PartialRule2[Tile, Rule[Tile]] = {
-    val b = Rule.newBuilder[Tile]
-    b += this
-    b += that
-    new Rule.PartialRule2(b)
+    new Rule.PartialRule2(Rule.newBuilder[Tile] += this += that)
   }
   def | (that: TupleTile): Rule.PartialRule2[TupleTile, (Rule[Tile], Rule[Tile])] =
     TupleTile(this, this) | that
@@ -72,10 +69,7 @@ case class Tile(segs: Set[Segment]) extends SymTile {
   def | (that: TupleCoupleTile): (Rule[Tile], Rule[Tile]) = (this | that.ctile1, this | that.ctile2)
   def | (cs: CoupleSegment): Rule[Tile] = this | Implicits.coupleSegmentToCoupleTile(cs)
   def | (that: IdSymTile): Rule.PartialRule2[SymTile, Rule[SymTile]] = {
-    val b = Rule.newBuilder[SymTile]
-    b += this
-    b += that
-    new Rule.PartialRule2(b)
+    new Rule.PartialRule2(Rule.newBuilder[SymTile] += this += that)
   }
   override def toString = segs.mkString(" & ")
 
@@ -99,17 +93,11 @@ private[meta] case class TupleTile(tile1: Tile, tile2: Tile) extends TupleTileLi
   def & (cseg: CoupleSegment): TupleCoupleTile = TupleCoupleTile(tile1 & cseg, tile2 & cseg)
   def & (tcs: TupleCoupleSegment): TupleCoupleTile = TupleCoupleTile(tile1 & tcs.cseg1, tile2 & tcs.cseg2)
   def | (that: TupleTile): Rule.PartialRule2[TupleTile, (Rule[Tile], Rule[Tile])] = {
-    val b = new Rule.TupleRuleBuilder[Tile, TupleTile]()
-    b += this
-    b += that
-    new Rule.PartialRule2(b)
+    new Rule.PartialRule2(new Rule.TupleRuleBuilder[Tile, TupleTile]() += this += that)
   }
   def | (that: TupleCoupleTile): (Rule[Tile], Rule[Tile]) = Implicits.tupleTileToTupleCoupleTile(this) | that
   def | (that: IdSymTile): Rule.PartialRule2[TupleSymTile, (Rule[SymTile], Rule[SymTile])] = {
-    val b = new Rule.TupleRuleBuilder[SymTile, TupleSymTile]
-    b += TupleSymTile(tile1, tile2)
-    b += TupleSymTile(that, that)
-    new Rule.PartialRule2(b)
+    new Rule.PartialRule2(new Rule.TupleRuleBuilder[SymTile, TupleSymTile] += TupleSymTile(tile1, tile2) += TupleSymTile(that, that))
   }
 }
 
@@ -174,22 +162,13 @@ private[meta] class IdSymTile(val symmetries: SymGroup, idTile: IdTile) extends 
   override def toString = s"$idTile[${symmetries.name}]"
 
   def | (that: Tile): Rule.PartialRule2[SymTile, Rule[SymTile]] = {
-    val b = Rule.newBuilder[SymTile]
-    b += this
-    b += that
-    new Rule.PartialRule2(b)
+    new Rule.PartialRule2(Rule.newBuilder[SymTile] += this += that)
   }
   def | (that: IdSymTile): Rule.PartialRule2[SymTile, Rule[SymTile]] = {
-    val b = Rule.newBuilder[SymTile]
-    b += this
-    b += that
-    new Rule.PartialRule2(b)
+    new Rule.PartialRule2(Rule.newBuilder[SymTile] += this += that)
   }
   def | (that: TupleTile): Rule.PartialRule2[TupleSymTile, (Rule[SymTile], Rule[SymTile])] = {
-    val b = new Rule.TupleRuleBuilder[SymTile, TupleSymTile]
-    b += TupleSymTile(this, this)
-    b += TupleSymTile(that.tile1, that.tile2)
-    new Rule.PartialRule2(b)
+    new Rule.PartialRule2(new Rule.TupleRuleBuilder[SymTile, TupleSymTile] += TupleSymTile(this, this) += TupleSymTile(that.tile1, that.tile2))
   }
   def | (that: CoupleTile): Rule[SymTile] = Rule(this, that.tile1, this, that.tile2)
   def | (that: TupleCoupleTile): (Rule[SymTile], Rule[SymTile]) = (this | that.ctile1, this | that.ctile2)
