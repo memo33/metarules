@@ -59,6 +59,8 @@ object Flag {
     val BlendRight: Flag = new NestedFlag(flipFlags.BlendLeft, revFlags.BlendRight, 13, _.BlendRight)
     val ExtBlendLeft: Flag = new NestedFlag(flipFlags.ExtBlendRight, revFlags.ExtBlendLeft, 111, _.ExtBlendLeft)
     val ExtBlendRight: Flag = new NestedFlag(flipFlags.ExtBlendLeft, revFlags.ExtBlendRight, 113, _.ExtBlendRight)
+    val BlendLeftR1: Flag = new NestedFlag(flipFlags.BlendRightR1, revFlags.BlendLeftR1, 121, _.BlendLeftR1)
+    val BlendRightR1: Flag = new NestedFlag(flipFlags.BlendLeftR1, revFlags.BlendRightR1, 123, _.BlendRightR1)
     val FlexFly01L: Flag = new NestedFlag(flipFlags.FlexFly01R, revFlags.FlexFly01L, 211, _.FlexFly01L)
     val FlexFly01R: Flag = new NestedFlag(flipFlags.FlexFly01L, revFlags.FlexFly01R, 213, _.FlexFly01R)
     val FlexFly12L: Flag = new NestedFlag(flipFlags.FlexFly12R, revFlags.FlexFly12L, 221, _.FlexFly12L)
@@ -91,6 +93,8 @@ object Flag {
     case 13 => Bi.BlendRight
     case 111 => Bi.ExtBlendLeft
     case 113 => Bi.ExtBlendRight
+    case 121 => Bi.BlendLeftR1
+    case 123 => Bi.BlendRightR1
   }
 
   def parseInOutFlag(v: Int): Flag = v match {
@@ -108,6 +112,10 @@ object Flag {
     case 111 => Out.ExtBlendLeft
     case -113 => In.ExtBlendRight
     case 113 => Out.ExtBlendRight
+    case -121 => In.BlendLeftR1
+    case 121 => Out.BlendLeftR1
+    case -123 => In.BlendRightR1
+    case 123 => Out.BlendRightR1
     case -211 => In.FlexFly01L
     case 211 => Out.FlexFly01L
     case -213 => In.FlexFly01R
