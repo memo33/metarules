@@ -2,7 +2,7 @@ name := "metarules"
 
 organization := "com.github.memo33"
 
-version := "0.2.1"
+version := "0.3.0"
 
 licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
 
