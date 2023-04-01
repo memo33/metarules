@@ -78,6 +78,22 @@ object RuleTransducer {
     rhs map { case (cg, dg) => (cg * fac, dg * fac) }
   }
 
+  /** Some ambiguities are unavoidable, unfortunately, if we want to avoid
+    * adding all the symmetries to the RUL2 output (in most situations these
+    * would be redundant).
+    * See the tests for an explicit example where this is a problem.
+    * This function makes an effort to choose the orientations that seem to work
+    * best. This takes into account that the game resolves RUL2 overrides from
+    * North to South and West to East.
+    */
+  private[meta] def resolveAmbiguousRhsOrientations(ag: RotFlip, bg: RotFlip, rhs: Iterable[(RotFlip, RotFlip)]): (RotFlip, RotFlip) = {
+    // The ambiguities can cause a tile that is normally represented by 0,0 and
+    // 1,0 to be represented by 1,0 and 2,0, so we pick the smallest RotFlip that
+    // rotates the input tile in the opposite direction.
+    // We also make the last tile most significant, as the ambiguity is more commonly on the last tile.
+    rhs.minBy { case (cg, dg) => (bg / dg, ag / cg) }
+  }
+
   private[meta] def createRules(rule: Rule[IdSymTile]): TraversableOnce[Rule[IdTile]] = {
     val a = rule(0); val b = rule(1); val c = rule(2); val d = rule(3)
     // TODO figure out whether really not to use mapped representations
@@ -101,10 +117,10 @@ object RuleTransducer {
 //        false
 //      }
     } yield {
-      if (rhs.size > 1) {
-        "Warning: ambiguous RHS orientations: " + rhs
-      }
-      val (cg, dg) = rhs.head
+      // if (rhs.size > 1) {
+      //   println(s"Warning: ambiguous RHS orientations: $rhs $rule")
+      // }
+      val (cg, dg) = resolveAmbiguousRhsOrientations(ag, bg, rhs)
 
       val result = Rule(
         IdTile(a.id, ag),
