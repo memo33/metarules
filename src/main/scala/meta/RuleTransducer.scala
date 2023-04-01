@@ -31,8 +31,8 @@ import Network._
   */
 object RuleTransducer {
 
-  def apply(rule: Rule[SymTile])(implicit resolve: IdResolver): TraversableOnce[Rule[IdTile]] = {
-    multiplyTla(rule).flatMap(rule => createRules(rule.map(_.toIdSymTile)))
+  def apply(rule: Rule[SymTile])(implicit resolve: IdResolver, tileOrientationCache: collection.mutable.Map[Int, Set[RotFlip]]): TraversableOnce[Rule[IdTile]] = {
+    multiplyTla(rule).flatMap(rule => createRules(rule.map(_.toIdSymTile), tileOrientationCache))
   }
 
   /** Tests whether the orientation of the two tiles can occur according to
@@ -94,8 +94,37 @@ object RuleTransducer {
     rhs.minBy { case (cg, dg) => (bg / dg, ag / cg) }
   }
 
-  private[meta] def createRules(rule: Rule[IdSymTile]): TraversableOnce[Rule[IdTile]] = {
+  /** The RHS-orientations contain more possible orientations than the absolute
+    * orientations currently stored in repr allows.
+    * Therefore, we enlarge the repr by computing the closure of repr under
+    * rotations by the relative differences of the RHS-orientations.
+    */
+  private[meta] def computeExtendedRepr(repr: Set[RotFlip], rhsOrientations: Iterable[RotFlip]): Set[RotFlip] = {
+    val g0 = rhsOrientations.head
+    val gs = (RotFlip.ValueSet.newBuilder ++= rhsOrientations.tail).result
+    if (gs.isEmpty) {
+      // this can happen when the other RHS had the ambiguity, so there is nothing to do
+      repr
+    } else {
+      for (g <- gs; a <- repr; a2 <- Seq(a, a * (g / g0))) yield a2
+    }
+  }
+
+  private[meta] def addExtendedReprToCache(id: Int, repr: Set[RotFlip], rhsOrientations: Iterable[RotFlip], tileOrientationCache: collection.mutable.Map[Int, Set[RotFlip]]): Unit = {
+    val repr1 = tileOrientationCache.getOrElse(id, repr)
+    val repr2 = computeExtendedRepr(repr1, rhsOrientations)
+    if (repr2 != repr1) {
+      tileOrientationCache(id) = repr2
+    }
+  }
+
+  private[meta] def createRules(rule: Rule[IdSymTile], tileOrientationCache: collection.mutable.Map[Int, Set[RotFlip]]): TraversableOnce[Rule[IdTile]] = {
     val a = rule(0); val b = rule(1); val c = rule(2); val d = rule(3)
+    val aRepr = tileOrientationCache.getOrElse(a.id, a.repr)
+    val bRepr = tileOrientationCache.getOrElse(b.id, b.repr)
+    val cRepr = tileOrientationCache.getOrElse(c.id, c.repr)
+    val dRepr = tileOrientationCache.getOrElse(d.id, d.repr)
+
     // TODO figure out whether really not to use mapped representations
     require(isReachable(a.symmetries.quotient, a.rf, b.symmetries.quotient, b.rf), "Orientations are not reachable: " + rule.map(t => IdTile(t.id, t.rf)))
 
@@ -105,11 +134,11 @@ object RuleTransducer {
       as <- a.symmetries; ag = a.rf * as * fac
       bs <- b.symmetries; bg = b.rf * bs * fac
       if !hasSmallerEquivRepr(a.id, ag, b.id, bg)
-      if isReachable(a.repr, ag, b.repr, bg)
-      rhs = mappedRhs(fac, findRhsOrientation(ag/fac, a.symmetries, a.repr,
-                                              bg/fac, b.symmetries, b.repr,
-                                              c.rf,   c.symmetries, c.repr,
-                                              d.rf,   d.symmetries, d.repr))
+      if isReachable(aRepr, ag, bRepr, bg)
+      rhs = mappedRhs(fac, findRhsOrientation(ag/fac, a.symmetries, aRepr,
+                                              bg/fac, b.symmetries, bRepr,
+                                              c.rf,   c.symmetries, cRepr,
+                                              d.rf,   d.symmetries, dRepr))
       if rhs.nonEmpty //|| {
 //        println("Warning: Could not find RHS orientation:\n" + rule.map(t => IdTile(t.id, t.rf)) +
 //          s"\nfac $fac as $as ag $ag bs $bs bg $bg\n" +
@@ -117,9 +146,18 @@ object RuleTransducer {
 //        false
 //      }
     } yield {
-      // if (rhs.size > 1) {
-      //   println(s"Warning: ambiguous RHS orientations: $rhs $rule")
-      // }
+      if (rhs.size > 1) {
+        // In this case, the RHS orientations are ambiguous, which means that
+        // the tiles involved on the RHS can appear with non-standard absolute
+        // rotations. We compute these additional rotations and add them to the
+        // cache, so that other metarules can take the additional rotations into
+        // account.
+        // As this only affects subsequent metarules, this requires two global
+        // runs of the entire metarule compilation process to produce consistent
+        // results.
+        addExtendedReprToCache(c.id, cRepr, rhs.map(_._1), tileOrientationCache)
+        addExtendedReprToCache(d.id, dRepr, rhs.map(_._2), tileOrientationCache)
+      }
       val (cg, dg) = resolveAmbiguousRhsOrientations(ag, bg, rhs)
 
       val result = Rule(
@@ -128,11 +166,11 @@ object RuleTransducer {
         IdTile(c.id, cg),
         IdTile(d.id, dg))
 
-      if (!isReachable(c.repr, cg, d.repr, dg)) {
+      if (!isReachable(cRepr, cg, dRepr, dg)) {
         println("Warning: unreachable RHS orientation: " + result)
-      } else if (!isReachable(a.repr, ag, d.repr, dg)) {
+      } else if (!isReachable(aRepr, ag, dRepr, dg)) {
         println("Warning: unreachable orientation (0;3): " + result)
-      } else if (!isReachable(c.repr, cg, b.repr, bg)) {
+      } else if (!isReachable(cRepr, cg, bRepr, bg)) {
         println("Warning: unreachable orientation (1;2): " + result)
       }
 
