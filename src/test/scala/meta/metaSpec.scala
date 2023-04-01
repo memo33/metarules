@@ -57,6 +57,59 @@ class metaSpec extends WordSpec with Matchers {
     }
   }
 
+  "Metarule syntax" should {
+    "support compatibility mode with RUL2 syntax" in {
+      import Flags._, Network._, Implicits._
+      import RotFlip._, Group.SymGroup.Cyc1
+      def % = Tile.CopyTile
+      type TR = (Rule[SymTile], Rule[SymTile]) // tuple rule
+      val it = IdTile(0x12345678, R0F0, Cyc1)
+
+      (it | Road~WE | it | Road~WE)  // : Rule[SymTile]
+      (it | Road~WE | % | Road~WE)  // : Rule[SymTile]
+      (it | Road~WE & Rail~NS | % | %)  // : Rule[SymTile]
+      (it | Road~WE & Rail~NS | it | %)  // : Rule[SymTile]
+      (it | Road~WE & Rail~NS | % | it)  // : Rule[SymTile]
+      (it | Road~WE & Rail~NS | it | it)  // : Rule[SymTile]
+      (it | Road~WE & Rail~NS & Lightrail~ES | % | %)  // : Rule[SymTile]
+      (it | Road~WE~EW | it | Road~WE~EW)  // : TR
+      (it | Road~WE~EW & Rail~NS | % | Road~WE~EW & Rail~NS)  // : TR
+      (it | Road~WE~EW & Rail~NS | it | Road~WE~EW & Rail~NS)  // : TR
+      (it | (Road ~> Road)~WE)  // : Rule[SymTile]
+      (it | (Road ~> Road)~WE & Rail~NS)  // : Rule[SymTile]
+      (it | (Road ~> Road)~WE & Rail~NS~SN)  // : TR
+      (it | (Road ~> Road)~WE~EW & Rail~NS)  // : TR
+
+      (Road~WE | it | Road~WE | it)  // : Rule[SymTile]
+      (Road~WE | it | Road~WE | %)  // : Rule[SymTile]
+      (Road~WE & Rail~NS | it | % | %)  // : Rule[SymTile]
+      (Road~WE & Rail~NS | it | % | it)  // : Rule[SymTile]
+      (Road~WE & Rail~NS | it | it | %)  // : Rule[SymTile]
+      (Road~WE & Rail~NS | it | it | it)  // : Rule[SymTile]
+      (Road~WE & Rail~NS & Lightrail~ES | it | % | %)  // : Rule[SymTile]
+      (Road~WE~EW | it | Road~WE~EW | it)  // : TR
+      (Road~WE~EW & Rail~NS | it | Road~WE~EW & Rail~NS | %)  // : TR
+      (Road~WE~EW & Rail~NS | it | Road~WE~EW & Rail~NS | it)  // : TR
+      ((Road ~> Road)~WE | it)  // : Rule[SymTile]
+      ((Road ~> Road)~WE & Rail~NS | it)  // : Rule[SymTile]
+      ((Road ~> Road)~WE & Rail~NS~SN | it)  // : TR
+      ((Road ~> Road)~WE~EW & Rail~NS | it)  // : TR
+
+      (it | it | it | it)
+      (it | it | % | it)
+      (it | it | it | %)
+      (it | it | it | Road~EW)
+      (it | it | Road~EW | it)
+      (it | it | Road~EW | Road~EW)
+      (it | Road~EW | it | it)
+      (Road~EW~WE | it | it | it)
+      (Road~EW | Road~EW & Rail~NS | it | it)
+      (Road~EW | Road~EW | it | it)
+      (Road~EW | Road~EW | it | Road~EW)
+      (Road~EW | Road~EW | Road~EW | it)
+    }
+  }
+
   "Flag" should {
     import Flag._
     "initialize flip correctly" in {
@@ -87,6 +140,16 @@ class metaSpec extends WordSpec with Matchers {
       for (n <- Network.values) {
         (n~SharedDiagRight).reverse should be (n~SharedDiagRight)
       }
+    }
+  }
+
+  "IdSymTile" should {
+    "respect symmerties upon rotation" in {
+      import RotFlip._, Group.SymGroup._
+      val it = IdTile(0x12345678, R1F0, Cyc2B)
+      (it * R1F0).symmetries shouldBe Cyc2D
+      (it * R2F0).symmetries shouldBe Cyc2B
+      (it * R1F0).rf shouldBe R2F0
     }
   }
 }

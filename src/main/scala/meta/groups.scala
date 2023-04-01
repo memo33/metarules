@@ -132,6 +132,9 @@ object Group {
     val Dih2B = Val(Seq((0,0), (2,0), (1,1), (3,1)), QuotientGroup.Cyc2A)
     val Dih4  = Val(Seq((0,0), (1,0), (2,0), (3,0), (0,1), (3,1), (2,1), (1,1)), QuotientGroup.Cyc1)
 
+    /** alias for Cyc1 */
+    val noSymmetries = Cyc1
+
     def ofFlags(flags: Flags): SymGroup =
       ofImpl(rf => flags == flags * rf)
     def ofTile(tile: Tile): SymGroup =
