@@ -207,6 +207,12 @@ object Rule {
 
   def apply[A <: TileLike : ClassTag](a: A, b: A, c: A, d: A) = new Rule(Array(a, b, c, d))
 
+  def apply(
+    a: Int, ar: Byte, af: Byte,
+    b: Int, br: Byte, bf: Byte,
+    c: Int, cr: Byte, cf: Byte,
+    d: Int, dr: Byte, df: Byte): Rule[IdTile] = Rule(IdTile(a, ar, af), IdTile(b, br, bf), IdTile(c, cr, cf), IdTile(d, dr, df))
+
   abstract class RuleBuilderLike[B <: TileLike : ClassTag, C] extends Builder[B, C] {
     private[Rule] var arr = new Array[B](4)
     private[this] var i = 0
