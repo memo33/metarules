@@ -31,6 +31,8 @@ import Network._
   */
 object RuleTransducer {
 
+  val LOGGER = java.util.logging.Logger.getLogger("networkaddonmod")
+
   def apply(rule: Rule[SymTile])(implicit resolve: IdResolver, tileOrientationCache: collection.mutable.Map[Int, Set[RotFlip]]): TraversableOnce[Rule[IdTile]] = {
     multiplyTla(rule).flatMap(rule => createRules(rule.map(_.toIdSymTile), tileOrientationCache))
   }
@@ -140,11 +142,11 @@ object RuleTransducer {
                                               c.rf,   c.symmetries, cRepr,
                                               d.rf,   d.symmetries, dRepr))
       if rhs.nonEmpty //|| {
-//        println("Warning: Could not find RHS orientation:\n" + rule.map(t => IdTile(t.id, t.rf)) +
-//          s"\nfac $fac as $as ag $ag bs $bs bg $bg\n" +
-//          rule.map(t => s"${t.symmetries} ${t.repr}").mkString("\n"))
-//        false
-//      }
+      //   LOGGER.warning("Could not find RHS orientation:\n" + rule.map(t => IdTile(t.id, t.rf)) +
+      //     s"\nfac $fac as $as ag $ag bs $bs bg $bg\n" +
+      //     rule.map(t => s"${t.symmetries} ${t.repr}").mkString("\n"))
+      //   false
+      // }
     } yield {
       if (rhs.size > 1) {
         // In this case, the RHS orientations are ambiguous, which means that
@@ -167,17 +169,17 @@ object RuleTransducer {
         IdTile(d.id, dg))
 
       if (!isReachable(cRepr, cg, dRepr, dg)) {
-        println("Warning: unreachable RHS orientation: " + result)
+        LOGGER.warning("unreachable RHS orientation: " + result)
       } else if (!isReachable(aRepr, ag, dRepr, dg)) {
-        println("Warning: unreachable orientation (0;3): " + result)
+        LOGGER.warning("unreachable orientation (0;3): " + result)
       } else if (!isReachable(cRepr, cg, bRepr, bg)) {
-        println("Warning: unreachable orientation (1;2): " + result)
+        LOGGER.warning("unreachable orientation (1;2): " + result)
       }
 
       result
     }
     if (result.isEmpty) {
-      println("Warning: did not produce any rules for: " + rule.map(t => IdTile(t.id, t.rf)))
+      LOGGER.warning("did not produce any rules for: " + rule.map(t => IdTile(t.id, t.rf)))
     }
     result
   }
