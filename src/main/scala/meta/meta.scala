@@ -20,6 +20,8 @@ case class Segment(network: Network, flags: Flags) {
       "reversing does not currently work for shared-tile diagonals") // TODO fix this
     copy(flags = Flags(flags(0).reverse, flags(1).reverse, flags(2).reverse, flags(3).reverse)) // TODO implement CanBuildFrom
   }
+  def projectLeft: Segment = copy(flags = flags.makeLeftHeaded)
+  def projectRight: Segment = copy(flags = flags.makeRightHeaded)
 }
 
 private[meta] case class TupleSegment(seg1: Segment, seg2: Segment) {
@@ -45,12 +47,9 @@ private[meta] sealed trait TileLike
 sealed trait SymTile extends TileLike {
   def symmetries: SymGroup
   def representations: QuotientGroup = symmetries.quotient
+  def * (rf: RotFlip): SymTile
 
   def toIdSymTile(implicit resolve: IdResolver): IdSymTile
-  private[meta] def containsTlaFlags: Boolean = false
-  private[meta] def shouldOnlyProjectLeft: Boolean = true
-  private[meta] def projectLeft: SymTile = this
-  private[meta] def projectRight: SymTile = this
 }
 
 case class Tile(segs: Set[Segment]) extends SymTile {
@@ -74,10 +73,6 @@ case class Tile(segs: Set[Segment]) extends SymTile {
   override def toString = segs.mkString(" & ")
 
   def toIdSymTile(implicit resolve: IdResolver) = new IdSymTile(symmetries, resolve(this))
-  override private[meta] def containsTlaFlags: Boolean = segs.exists(_.network.isTla)
-  override private[meta] def shouldOnlyProjectLeft: Boolean = segs.forall(!_.network.isTla) || !symmetries.quotient.exists(_.flipped)
-  override private[meta] def projectLeft: SymTile = Tile.projectLeft(this)
-  override private[meta] def projectRight: SymTile = Tile.projectRight(this)
 }
 
 trait TupleTileLike[A] extends TileLike {
@@ -128,8 +123,8 @@ object Tile {
   private def projectTla(t: Tile, p: Flags => Flags): Tile = t.copy(segs =
     t.segs.map(s => if (!s.network.isTla) s else s.copy(flags = p(s.flags)))
     )
-  /*private*/ val projectLeft = (t: Tile) => projectTla(t, _.makeLeftHeaded)
-  /*private*/ val projectRight = (t: Tile) => projectTla(t, _.makeRightHeaded)
+  val projectTlaLeft = (t: Tile) => projectTla(t, _.makeLeftHeaded)
+  val projectTlaRight = (t: Tile) => projectTla(t, _.makeRightHeaded)
 
   case object CopyTile
 }

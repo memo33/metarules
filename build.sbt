@@ -2,7 +2,7 @@ name := "metarules"
 
 organization := "com.github.memo33"
 
-version := "0.3.1"
+version := "0.3.2-SNAPSHOT"
 
 licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
 
@@ -22,8 +22,6 @@ javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 console / initialCommands := """
 import metarules._, metarules.meta._
 import Implicits._, Network._, Flag._, Flags._, RotFlip._, Tile.{CopyTile => %}, Group.SymGroup._
-//implicit val resolve = module.Main.resolve  // requires https://github.com/NAMTeam/Network-Addon-Mod/blob/master/src/main/scala/module/Main.scala
-//def transduce(rule: Rule[SymTile]): Unit = RuleTransducer(rule) foreach println
 """
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.5" % "test"

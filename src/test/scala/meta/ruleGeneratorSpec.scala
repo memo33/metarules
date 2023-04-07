@@ -19,7 +19,7 @@ class RuleGeneratorSpec extends WordSpec with Matchers {
         (L1Rhw2~EW,   IdTile(0x57100000, R1F0)))
 
       val generator = new RuleGenerator {
-        val resolver = resolve
+        var context = RuleTransducer.Context(resolve)
         def start(): Unit = {
           Rules += Mis~WE    | (Dirtroad ~> Mis)~WE
           Rules += L1Rhw2~WE | (Dirtroad ~> L1Rhw2)~WE

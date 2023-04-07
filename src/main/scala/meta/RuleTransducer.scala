@@ -33,8 +33,14 @@ object RuleTransducer {
 
   val LOGGER = java.util.logging.Logger.getLogger("networkaddonmod")
 
-  def apply(rule: Rule[SymTile])(implicit resolve: IdResolver, tileOrientationCache: collection.mutable.Map[Int, Set[RotFlip]]): TraversableOnce[Rule[IdTile]] = {
-    multiplyTla(rule).flatMap(rule => createRules(rule.map(_.toIdSymTile), tileOrientationCache))
+  def apply(rule: Rule[SymTile])(implicit context: Context): TraversableOnce[Rule[IdTile]] = {
+    val input = context.preprocess(rule)
+    val inputNonEmpty = input.nonEmpty
+    val result = input.flatMap(rule => createRules(rule.map(_.toIdSymTile(context.resolve)), context.tileOrientationCache))
+    if (result.isEmpty && inputNonEmpty) {
+      LOGGER.warning(s"did not produce any rules for: $rule")
+    }
+    result
   }
 
   /** Tests whether the orientation of the two tiles can occur according to
@@ -130,7 +136,7 @@ object RuleTransducer {
     // TODO figure out whether really not to use mapped representations
     require(isReachable(a.symmetries.quotient, a.rf, b.symmetries.quotient, b.rf), "Orientations are not reachable: " + rule.map(t => IdTile(t.id, t.rf)))
 
-    val result = for {
+    for {
       // TODO possibly, factor needs to be refined in case of equal IIDs
       fac <- if (!a.symmetries.contains(R2F1) || !b.symmetries.contains(R2F1)) Seq(R0F0, R2F1) else Seq(R0F0)
       as <- a.symmetries; ag = a.rf * as * fac
@@ -178,19 +184,12 @@ object RuleTransducer {
 
       result
     }
-    if (result.isEmpty) {
-      LOGGER.warning("did not produce any rules for: " + rule.map(t => IdTile(t.id, t.rf)))
-    }
-    result
   }
 
-  private[meta] def multiplyTla(rule: Rule[SymTile]): TraversableOnce[Rule[SymTile]] = {
-    if (!rule.exists(_.containsTlaFlags)) {
-      Iterator(rule)
-    } else if (rule.forall(_.shouldOnlyProjectLeft)) {
-      Iterator(rule.map(_.projectLeft))
-    } else {
-      Iterator(rule.map(_.projectLeft), rule.map(_.projectRight))
-    }
-  }
+  val defaultPreprocessor: Rule[SymTile] => Iterator[Rule[SymTile]] = rule => Iterator(rule)
+
+  case class Context(
+    resolve: IdResolver,
+    tileOrientationCache: collection.mutable.Map[Int, Set[RotFlip]] = collection.mutable.Map.empty,
+    preprocess: Rule[SymTile] => Iterator[Rule[SymTile]] = defaultPreprocessor)
 }
