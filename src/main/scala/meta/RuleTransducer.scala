@@ -186,16 +186,7 @@ object RuleTransducer {
     }
   }
 
-  private[meta] val defaultPreprocessor: Rule[SymTile] => Iterator[Rule[SymTile]] = rule => {
-    // TODO TLA networks should not be hardcoded here
-    if (!rule.exists(_.containsTlaFlags)) {
-      Iterator(rule)
-    } else if (rule.forall(_.shouldOnlyProjectLeft)) {
-      Iterator(rule.map(_.projectLeft))
-    } else {
-      Iterator(rule.map(_.projectLeft), rule.map(_.projectRight))
-    }
-  }
+  val defaultPreprocessor: Rule[SymTile] => Iterator[Rule[SymTile]] = rule => Iterator(rule)
 
   case class Context(
     resolve: IdResolver,
