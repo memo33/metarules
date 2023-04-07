@@ -33,8 +33,8 @@ object RuleTransducer {
 
   val LOGGER = java.util.logging.Logger.getLogger("networkaddonmod")
 
-  def apply(rule: Rule[SymTile])(implicit resolve: IdResolver, tileOrientationCache: collection.mutable.Map[Int, Set[RotFlip]]): TraversableOnce[Rule[IdTile]] = {
-    multiplyTla(rule).flatMap(rule => createRules(rule.map(_.toIdSymTile), tileOrientationCache))
+  def apply(rule: Rule[SymTile])(implicit context: Context): TraversableOnce[Rule[IdTile]] = {
+    context.preprocess(rule).flatMap(rule => createRules(rule.map(_.toIdSymTile(context.resolve)), context.tileOrientationCache))
   }
 
   /** Tests whether the orientation of the two tiles can occur according to
@@ -184,7 +184,8 @@ object RuleTransducer {
     result
   }
 
-  private[meta] def multiplyTla(rule: Rule[SymTile]): TraversableOnce[Rule[SymTile]] = {
+  private[meta] val defaultPreprocessor: Rule[SymTile] => Iterator[Rule[SymTile]] = rule => {
+    // TODO TLA networks should not be hardcoded here
     if (!rule.exists(_.containsTlaFlags)) {
       Iterator(rule)
     } else if (rule.forall(_.shouldOnlyProjectLeft)) {
@@ -193,4 +194,9 @@ object RuleTransducer {
       Iterator(rule.map(_.projectLeft), rule.map(_.projectRight))
     }
   }
+
+  case class Context(
+    resolve: IdResolver,
+    tileOrientationCache: collection.mutable.Map[Int, Set[RotFlip]] = collection.mutable.Map.empty,
+    preprocess: Rule[SymTile] => Iterator[Rule[SymTile]] = defaultPreprocessor)
 }

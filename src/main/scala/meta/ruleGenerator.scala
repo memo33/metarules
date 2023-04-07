@@ -18,21 +18,23 @@ trait RuleGenerator {
     */
   protected def createRules(): Unit = {
     Rules.distinct foreach { r =>
-      queue ++= RuleTransducer(r)(resolver, tileOrientationCache)
+      queue ++= RuleTransducer(r)(context)
     }
     Rules.clear()
   }
 
-  /** The function that maps `Tiles` (meta syntax) to `IdTiles` (IID, Rot, Flip). */
-  val resolver: IdResolver
-
-  /** This overwrites the possible absolute orientations of some IDs when the
-    * `RuleTransducer` determines that this is necessary.
+  /** The context provides the resolver (the function that maps `Tiles` (meta
+    * syntax) to `IdTiles` (IID, Rot, Flip).
     *
+    * It also provides the `tileOrientationCache`, which
+    * overwrites the possible absolute orientations of some IDs when the
+    * `RuleTransducer` determines that this is necessary.
     * For correct functionality, it is important to overwrite this by a map that
     * is common between all rule generators (globally).
+    *
+    * It also implements handling of mirror variants.
     */
-  var tileOrientationCache = collection.mutable.Map.empty[Int, Set[RotFlip]]
+  var context: RuleTransducer.Context
 
   /** Generates the Rules. Needs to be implemented.*/
   def start(): Unit
