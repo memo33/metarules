@@ -20,6 +20,8 @@ case class Segment(network: Network, flags: Flags) {
       "reversing does not currently work for shared-tile diagonals") // TODO fix this
     copy(flags = Flags(flags(0).reverse, flags(1).reverse, flags(2).reverse, flags(3).reverse)) // TODO implement CanBuildFrom
   }
+  def projectLeft: Segment = copy(flags = flags.makeLeftHeaded)
+  def projectRight: Segment = copy(flags = flags.makeRightHeaded)
 }
 
 private[meta] case class TupleSegment(seg1: Segment, seg2: Segment) {
@@ -45,6 +47,7 @@ private[meta] sealed trait TileLike
 sealed trait SymTile extends TileLike {
   def symmetries: SymGroup
   def representations: QuotientGroup = symmetries.quotient
+  def * (rf: RotFlip): SymTile
 
   def toIdSymTile(implicit resolve: IdResolver): IdSymTile
   private[meta] def containsTlaFlags: Boolean = false
