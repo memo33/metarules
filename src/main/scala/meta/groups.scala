@@ -110,6 +110,22 @@ object Group {
         if (this == Cyc2C ^ (g.rot + g.flip) % 2 == 0) Cyc2E else Cyc2C
       }
     }
+
+    /** Reduction modulo symmetry group.
+      * Finds smallest h such that ∃ g ∈ group : rf * g == h,
+      * in other words, the smallest representative in the left coset of rf.
+      * Careful: reduction is one-sided since multiplication is not commutative
+      * and group is not necessarily normal.
+      */
+    def reduceLeftCoset(rf: RotFlip): RotFlip = {
+      quotient.find(h => this.contains((RotFlip.R0F0 / rf) * h)).get
+    }
+    /** Finds smallest h such that ∃ g ∈ group : g * rf == h,
+      * in other words, the smallest representative in the right coset of rf.
+      */
+    def reduceRightCoset(rf: RotFlip): RotFlip = {
+      quotient.find(h => this.contains(h / rf)).get
+    }
   }
   object SymGroup extends scalaenum.Enum {
     import RotFlip._
