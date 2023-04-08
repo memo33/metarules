@@ -3,7 +3,7 @@ package metarules.meta
 import RotFlip._
 import Group._
 import SymGroup._
-import QuotientGroup._
+import Quotient._
 
 /* The content of this file makes the MetaRUL DSL syntax work. Changes in here
  * are unlikely to be necessary.
@@ -46,7 +46,7 @@ private[meta] sealed trait TileLike
 
 sealed trait SymTile extends TileLike {
   def symmetries: SymGroup
-  def representations: QuotientGroup = symmetries.quotient
+  def representations: Quotient = symmetries.quotient
   def * (rf: RotFlip): SymTile
 
   def toIdSymTile(implicit resolve: IdResolver): IdSymTile
@@ -129,7 +129,7 @@ object Tile {
   case object CopyTile
 }
 
-case class IdTile(id: Int, rf: RotFlip, mappedRepr: QuotientGroup => Set[RotFlip] = identity) extends TileLike {
+case class IdTile(id: Int, rf: RotFlip, mappedRepr: Quotient => Set[RotFlip] = identity) extends TileLike {
   override def toString = f"0x$id%08X,${rf.rot},${rf.flip}"
   def * (rf: RotFlip) = copy(rf = this.rf * rf)
 
@@ -145,7 +145,7 @@ object IdTile {
   def apply(id: Int, rf: RotFlip, symmetries: SymGroup): IdSymTile = {
     new IdSymTile(symmetries, IdTile(id, rf))
   }
-  def apply(id: Int, rf: RotFlip, symmetries: SymGroup, mappedRepr: QuotientGroup => Set[RotFlip]): IdSymTile = {
+  def apply(id: Int, rf: RotFlip, symmetries: SymGroup, mappedRepr: Quotient => Set[RotFlip]): IdSymTile = {
     new IdSymTile(symmetries, IdTile(id, rf, mappedRepr))
   }
   def apply(idTile: IdTile, symmetries: SymGroup): IdSymTile = {

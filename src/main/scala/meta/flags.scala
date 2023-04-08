@@ -1,6 +1,6 @@
 package metarules.meta
 
-import Group._, SymGroup._, QuotientGroup._, RotFlip._
+import Group._, SymGroup._, Quotient._, RotFlip._
 import Flag._
 
 /** Represents a single flag commonly used in SC4 RULs, tough with slight
@@ -158,7 +158,7 @@ class Flags private (fs: Array[Flag], off: Int = 0) extends IndexedSeq[Flag] {
   }
 
   lazy val symmetries: SymGroup = SymGroup.ofFlags(this)
-  def representations: QuotientGroup = symmetries.quotient
+  def representations: Quotient = symmetries.quotient
 
   def makeLeftHeaded: Flags = new Flags(fs map (_.makeLeftHeaded), off)
   def makeRightHeaded: Flags = new Flags(fs map (_.makeRightHeaded), off)

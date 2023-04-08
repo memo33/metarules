@@ -57,7 +57,7 @@ object RotFlip extends scalaenum.Enum { // was previously called GroupElement
   }
 }
 
-sealed trait Group extends SortedSet[GroupElement] { this: Group.ValName =>
+sealed trait GSet extends SortedSet[GroupElement] { this: Group.ValName =>
   protected val rep: RotFlip.ValueSet
   override def stringPrefix = name
 
@@ -77,15 +77,15 @@ object Group {
     def name: String = super.toString
   }
 
-  class QuotientGroup private (protected val rep: RotFlip.ValueSet)
-    extends QuotientGroup.Val with ValName with Group
-  object QuotientGroup extends scalaenum.Enum {
+  class Quotient private (protected val rep: RotFlip.ValueSet)
+    extends Quotient.Val with ValName with GSet
+  object Quotient extends scalaenum.Enum {
     import RotFlip._
 
-    type Value = QuotientGroup
+    type Value = Quotient
 
     private def Val(r: Seq[Tuple2[Int, Int]]) =
-      new QuotientGroup(RotFlip.ValueSet(r.map(tup => RotFlip(tup._1, tup._2)): _*))
+      new Quotient(RotFlip.ValueSet(r.map(tup => RotFlip(tup._1, tup._2)): _*))
 
     val Cyc1  = Val(Seq((0,0)))
     val Cyc2A = Val(Seq((0,0), (1,0)))
@@ -96,10 +96,8 @@ object Group {
 
   }
 
-  class SymGroup private (
-    protected val rep: RotFlip.ValueSet,
-    val quotient: QuotientGroup)
-      extends SymGroup.Val with ValName with Group {
+  class SymGroup private (protected val rep: RotFlip.ValueSet, val quotient: Quotient)
+      extends SymGroup.Val with ValName with GSet {
     import SymGroup._
 
     def sub(that: SymGroup): Boolean = this forall (that contains _)
@@ -118,22 +116,22 @@ object Group {
 
     type Value = SymGroup
 
-    private def Val(r: Seq[Tuple2[Int, Int]], q: QuotientGroup) =
+    private def Val(r: Seq[Tuple2[Int, Int]], q: Quotient) =
       new SymGroup(RotFlip.ValueSet(r.map(tup => RotFlip(tup._1, tup._2)): _*), q)
 
-    val Cyc1  = Val(Seq((0,0)), QuotientGroup.Dih4)
-    val Cyc2A = Val(Seq((0,0), (2,0)), QuotientGroup.Dih2)
-    val Cyc2B = Val(Seq((0,0), (0,1)), QuotientGroup.Cyc4)
-    val Cyc2C = Val(Seq((0,0), (1,1)), QuotientGroup.Cyc4)
-    val Cyc2D = Val(Seq((0,0), (2,1)), QuotientGroup.Cyc4)
-    val Cyc2E = Val(Seq((0,0), (3,1)), QuotientGroup.Cyc4)
-    val Cyc4  = Val(Seq((0,0), (1,0), (2,0), (3,0)), QuotientGroup.Cyc2B)
-    val Dih2A = Val(Seq((0,0), (2,0), (0,1), (2,1)), QuotientGroup.Cyc2A)
-    val Dih2B = Val(Seq((0,0), (2,0), (1,1), (3,1)), QuotientGroup.Cyc2A)
-    val Dih4  = Val(Seq((0,0), (1,0), (2,0), (3,0), (0,1), (3,1), (2,1), (1,1)), QuotientGroup.Cyc1)
+    val Cyc1  = Val(Seq((0,0)), Quotient.Dih4)
+    val Cyc2A = Val(Seq((0,0), (2,0)), Quotient.Dih2)
+    val Cyc2B = Val(Seq((0,0), (0,1)), Quotient.Cyc4)
+    val Cyc2C = Val(Seq((0,0), (1,1)), Quotient.Cyc4)
+    val Cyc2D = Val(Seq((0,0), (2,1)), Quotient.Cyc4)
+    val Cyc2E = Val(Seq((0,0), (3,1)), Quotient.Cyc4)
+    val Cyc4  = Val(Seq((0,0), (1,0), (2,0), (3,0)), Quotient.Cyc2B)
+    val Dih2A = Val(Seq((0,0), (2,0), (0,1), (2,1)), Quotient.Cyc2A)
+    val Dih2B = Val(Seq((0,0), (2,0), (1,1), (3,1)), Quotient.Cyc2A)
+    val Dih4  = Val(Seq((0,0), (1,0), (2,0), (3,0), (0,1), (3,1), (2,1), (1,1)), Quotient.Cyc1)
 
     /** alias for Cyc1 */
-    val noSymmetries = Cyc1
+    def noSymmetries = Cyc1
 
     def ofFlags(flags: Flags): SymGroup =
       ofImpl(rf => flags == flags * rf)
