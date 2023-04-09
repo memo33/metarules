@@ -57,20 +57,20 @@ object RotFlip extends scalaenum.Enum { // was previously called GroupElement
   }
 }
 
-sealed trait GSet extends SortedSet[GroupElement] { this: Group.ValName =>
-  protected val rep: RotFlip.ValueSet
-  override def stringPrefix = name
+package group {
 
-  def iterator: Iterator[GroupElement] = rep.iterator
-  def -(elem: GroupElement): SortedSet[GroupElement] = rep - elem
-  def +(elem: GroupElement): SortedSet[GroupElement] = rep + elem
-  def contains(elem: GroupElement): Boolean = rep.contains(elem)
-  def keysIteratorFrom(start: GroupElement): Iterator[GroupElement] = rep.keysIteratorFrom(start)
-  implicit def ordering: Ordering[GroupElement] = rep.ordering
-  def rangeImpl(from: Option[GroupElement],until: Option[GroupElement]): SortedSet[GroupElement] = rep.rangeImpl(from, until)
-}
+  sealed trait GSet extends SortedSet[GroupElement] { this: group.ValName =>
+    protected val rep: RotFlip.ValueSet
+    override def stringPrefix = name
 
-object Group {
+    def iterator: Iterator[GroupElement] = rep.iterator
+    def -(elem: GroupElement): SortedSet[GroupElement] = rep - elem
+    def +(elem: GroupElement): SortedSet[GroupElement] = rep + elem
+    def contains(elem: GroupElement): Boolean = rep.contains(elem)
+    def keysIteratorFrom(start: GroupElement): Iterator[GroupElement] = rep.keysIteratorFrom(start)
+    implicit def ordering: Ordering[GroupElement] = rep.ordering
+    def rangeImpl(from: Option[GroupElement],until: Option[GroupElement]): SortedSet[GroupElement] = rep.rangeImpl(from, until)
+  }
 
   // to avoid clashing of mixed in toStrings
   private[meta] trait ValName {

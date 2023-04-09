@@ -1,7 +1,7 @@
 package metarules.meta
 
 import RotFlip._
-import Group.SymGroup
+import group.SymGroup
 import Implicits._
 import Network._
 

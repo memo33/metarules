@@ -6,7 +6,7 @@ class RuleGeneratorSpec extends WordSpec with Matchers {
 
   "RuleGenerator" should {
     "should support meta syntax and RUL2-compatibility syntax" in {
-      import Network._, RotFlip._, Flags._, Implicits._, Group.SymGroup._
+      import Network._, RotFlip._, Flags._, Implicits._, group.SymGroup._
 
       val resolve = Map[Tile, IdTile](
         (Dirtroad~NS, IdTile(0x57000000, R0F0)),

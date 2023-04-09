@@ -1,7 +1,7 @@
 package metarules.meta
 
 import RotFlip._
-import Group._
+import group._
 import SymGroup._
 import Quotient._
 

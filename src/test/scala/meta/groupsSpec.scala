@@ -74,7 +74,7 @@ class GroupElementSpec extends WordSpec with Matchers {
 }
 
 class SymGroupSpec extends WordSpec with Matchers {
-  import Group.SymGroup, SymGroup._
+  import group.SymGroup, SymGroup._
 
   "SymGroup" should {
     "have quotient group of correct order" in {

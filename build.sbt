@@ -21,7 +21,7 @@ javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 
 console / initialCommands := """
 import metarules._, metarules.meta._
-import Implicits._, Network._, Flag._, Flags._, RotFlip._, Tile.{CopyTile => %}, Group.SymGroup._
+import Implicits._, Network._, Flag._, Flags._, RotFlip._, Tile.{CopyTile => %}, group.SymGroup._
 """
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.5" % "test"

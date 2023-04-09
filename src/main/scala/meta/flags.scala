@@ -1,6 +1,6 @@
 package metarules.meta
 
-import Group._, SymGroup._, Quotient._, RotFlip._
+import group._, SymGroup._, Quotient._, RotFlip._
 import Flag._
 
 /** Represents a single flag commonly used in SC4 RULs, tough with slight

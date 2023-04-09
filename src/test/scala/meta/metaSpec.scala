@@ -60,7 +60,7 @@ class metaSpec extends WordSpec with Matchers {
   "Metarule syntax" should {
     "support compatibility mode with RUL2 syntax" in {
       import Flags._, Network._, Implicits._
-      import RotFlip._, Group.SymGroup.Cyc1
+      import RotFlip._, group.SymGroup.Cyc1
       def % = Tile.CopyTile
       type TR = (Rule[SymTile], Rule[SymTile]) // tuple rule
       val it = IdTile(0x12345678, R0F0, Cyc1)
@@ -145,7 +145,7 @@ class metaSpec extends WordSpec with Matchers {
 
   "IdSymTile" should {
     "respect symmerties upon rotation" in {
-      import RotFlip._, Group.SymGroup._
+      import RotFlip._, group.SymGroup._
       val it = IdTile(0x12345678, R1F0, Cyc2B)
       (it * R1F0).symmetries shouldBe Cyc2D
       (it * R2F0).symmetries shouldBe Cyc2B
