@@ -14,10 +14,8 @@ class Network private (
 
   def isSymm: Boolean = typ == Symmetrical
 
-  val parseFlag: Int => Flag = if (typ == Symmetrical) Flag.parseBiFlag _ else Flag.parseInOutFlag _
-
   def ~ (w: Int, n: Int, e: Int, s: Int): Segment =
-    Segment(this, Flags(parseFlag(w), parseFlag(n), parseFlag(e), parseFlag(s)))
+    Segment(this, Flags(w, n, e, s, if (typ == Symmetrical) Flag.Bi else Flag.InOut))
 
   def ~ (flags: (Int, Int, Int, Int)): Segment =
     this ~ (flags._1, flags._2, flags._3, flags._4)

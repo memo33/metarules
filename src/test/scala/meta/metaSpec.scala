@@ -112,16 +112,35 @@ class metaSpec extends WordSpec with Matchers {
 
   "Flag" should {
     import Flag._
-    "initialize flip correctly" in {
-      Bi.Orth.flip should be (Bi.Orth)
-      In.Orth.flip should be (Out.Orth)
-      Out.Orth.flip should be (In.Orth)
+    "flip correctly" in {
+      Bi.flip(2) shouldBe 2
+      InOut.flip(2) shouldBe -2
+      InOut.flip(-2) shouldBe 2
+      Bi.flip(1) shouldBe 3
+      Bi.flip(3) shouldBe 1
+      InOut.flip(1) shouldBe -3
+      InOut.flip(3) shouldBe -1
+      InOut.flip(-1) shouldBe 3
+      InOut.flip(-3) shouldBe 1
     }
-    "initialize reverse correctly" in {
-      Bi.Orth.reverse should be (Bi.Orth)
-      In.Orth.reverse should be (Out.Orth)
-      Out.Orth.reverse should be (In.Orth)
-      In.DiagLeft.reverse should be (Out.DiagLeft)
+    "reverse correctly" in {
+      Bi.reverse(2) shouldBe 2
+      InOut.reverse(2) shouldBe -2
+      InOut.reverse(-2) shouldBe (2)
+      InOut.reverse(1) shouldBe -1
+      InOut.reverse(3) shouldBe -3
+      InOut.reverse(-1) shouldBe 1
+      InOut.reverse(-3) shouldBe 3
+    }
+    "display correctly" in {
+      Flags(0,1,2,-3,Bi).toString shouldBe "(0,1,2,3)"
+      Flags(0,1,2,-3,InOut).toString shouldBe "(0,+1,+2,-3)"
+      Flags(0,1,2,-3,LeftSpinBi).toString shouldBe "(0,1L,2L,3L)"
+      Flags(0,1,2,-3,LeftSpinInOut).toString shouldBe "(0,+1L,+2L,-3L)"
+    }
+    "not compare equal for different manifests" in {
+      Flags(0,2,0,-2,LeftSpinBi) should not be Flags(0,2,0,-2,RightSpinBi)
+      Flags(0,2,0,-2,LeftSpinBi) shouldBe Flags(0,2,0,-2,LeftSpinBi)
     }
   }
 
@@ -134,6 +153,13 @@ class metaSpec extends WordSpec with Matchers {
         (n~ES).reverse should be (n~SE)
         (n~NC).reverse should be (n~CN)
       }
+    }
+    "rotate and flip correctly" in {
+      import RotFlip._
+      (Avenue~NS) * R1F0 shouldBe Avenue~EW
+      (Avenue~NS) * R3F0 shouldBe Avenue~WE
+      (Avenue~NS) * R0F1 shouldBe Avenue~SN
+      (Avenue~NS) * R1F1 shouldBe Avenue~EW
     }
     "reverse shared-tile diagonals" ignore {
       // does not currently work, or does it? depends on what you expect

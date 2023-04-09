@@ -170,9 +170,16 @@ Adding new networks and flags
 Any new networks need to be added to the file [networks.scala](src/main/scala/meta/networks.scala).
 Make sure that the existing metarule code in the NAM repository plays well with the networks you add.
 
-If you need additional flags, these need to be added to the file [flags.scala](src/main/scala/meta/flags.scala).
-For example, apart from the standard flags, this file already contains some additional flags
-for multi-radius curves and FLEX-Fly curves.
+Flags used in metarules are similar to the network flags of the game, but there are some differences.
+You can use any integers as flags subject to the following conventions:
+
+- flags ending in 1 or 3 are swapped when flipped (useful for curves),
+- flags for symmetrical networks are non-negative,
+- flags for asymmetrical networks can be negative; they represent a direction
+  of travel (from negative to positive) and they change sign when flipped or reversed.
+
+For example, orthogonal Avenue in North-to-South direction is encoded by `Avenue~(0,-2,0,+2)`.
+The semantics of 4-flags or higher Rail-type flags are not supported.
 
 
 Combining metarule syntax and RUL2 syntax

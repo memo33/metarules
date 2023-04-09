@@ -18,10 +18,10 @@ case class Segment(network: Network, flags: Flags) {
   def reverse: Segment = {
     assert(network.typ != Network.AvenueLike || this != network~(Flags.SharedDiagLeft) && this != network~(Flags.SharedDiagRight),
       "reversing does not currently work for shared-tile diagonals") // TODO fix this
-    copy(flags = Flags(flags(0).reverse, flags(1).reverse, flags(2).reverse, flags(3).reverse)) // TODO implement CanBuildFrom
+    copy(flags = flags.reverseFlags)
   }
-  def projectLeft: Segment = copy(flags = flags.makeLeftHeaded)
-  def projectRight: Segment = copy(flags = flags.makeRightHeaded)
+  def projectLeft: Segment = copy(flags = flags.spinLeft)
+  def projectRight: Segment = copy(flags = flags.spinRight)
 }
 
 private[meta] case class TupleSegment(seg1: Segment, seg2: Segment) {
@@ -123,8 +123,8 @@ object Tile {
   private def projectTla(t: Tile, p: Flags => Flags): Tile = t.copy(segs =
     t.segs.map(s => if (!s.network.isTla) s else s.copy(flags = p(s.flags)))
     )
-  val projectTlaLeft = (t: Tile) => projectTla(t, _.makeLeftHeaded)
-  val projectTlaRight = (t: Tile) => projectTla(t, _.makeRightHeaded)
+  val projectTlaLeft = (t: Tile) => projectTla(t, _.spinLeft)
+  val projectTlaRight = (t: Tile) => projectTla(t, _.spinRight)
 
   case object CopyTile
 }
