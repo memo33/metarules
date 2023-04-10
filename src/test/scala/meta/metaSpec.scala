@@ -6,8 +6,8 @@ class metaSpec extends WordSpec with Matchers {
 
   "Rule use cases" should {
     "be compilable" in {
-      import Flags._, Network._, Implicits._
-      def % = Tile.CopyTile
+      import Flags._, internal.DummyNetwork._, Implicits._
+      def % = Rule.CopyTile
       type TR = (Rule[Tile], Rule[Tile]) // tuple rule
       (Road~WE | Road~WE | % | Road~WE)  // : Rule[Tile]
       (Road~WE~EW | Road~WE | % | Road~WE)  // : TR
@@ -59,9 +59,9 @@ class metaSpec extends WordSpec with Matchers {
 
   "Metarule syntax" should {
     "support compatibility mode with RUL2 syntax" in {
-      import Flags._, Network._, Implicits._
+      import Flags._, internal.DummyNetwork._, Implicits._
       import RotFlip._, group.SymGroup.Cyc1
-      def % = Tile.CopyTile
+      def % = Rule.CopyTile
       type TR = (Rule[SymTile], Rule[SymTile]) // tuple rule
       val it = IdTile(0x12345678, R0F0, Cyc1)
 
@@ -145,9 +145,9 @@ class metaSpec extends WordSpec with Matchers {
   }
 
   "Segment" should {
-    import Flags._, Network._, Implicits._
+    import Flags._, internal.DummyNetwork._, Implicits._
     "reverse correctly" in {
-      for (n <- Network.values) {
+      for (n <- Seq(Road, Avenue, Mis)) {
         (n~NS).reverse should be (n~SN)
         (n~WE).reverse should be (n~EW)
         (n~ES).reverse should be (n~SE)
@@ -163,7 +163,7 @@ class metaSpec extends WordSpec with Matchers {
     }
     "reverse shared-tile diagonals" ignore {
       // does not currently work, or does it? depends on what you expect
-      for (n <- Network.values) {
+      for (n <- Seq(Road, Avenue, Mis)) {
         (n~SharedDiagRight).reverse should be (n~SharedDiagRight)
       }
     }
@@ -171,7 +171,7 @@ class metaSpec extends WordSpec with Matchers {
 
   "IdSymTile" should {
     "respect symmerties upon rotation" in {
-      import RotFlip._, group.SymGroup._
+      import RotFlip._, group.SymGroup._, internal.DummyNetwork._
       val it = IdTile(0x12345678, R1F0, Cyc2B)
       (it * R1F0).symmetries shouldBe Cyc2D
       (it * R2F0).symmetries shouldBe Cyc2B

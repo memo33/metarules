@@ -6,8 +6,10 @@ import RotFlip._
 class EquivRuleSpec extends WordSpec with Matchers {
 
   "equals and hashcode" should {
-    def wrap(id1: Int, rf1: RotFlip, id2: Int, rf2: RotFlip): EquivRule =
+    def wrap(id1: Int, rf1: RotFlip, id2: Int, rf2: RotFlip): EquivRule = {
+      import internal.IdTile
       new EquivRule(Rule(IdTile(id1, rf1), IdTile(id2, rf2), IdTile(0, R0F0), IdTile(0, R0F0)))
+    }
     def wrapSame(rf1: RotFlip, rf2: RotFlip): EquivRule = wrap(0x100, rf1, 0x100, rf2)
 
     def test(er1: EquivRule, er2: EquivRule): Unit = {

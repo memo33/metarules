@@ -5,9 +5,34 @@ import group._
 import SymGroup._
 import Quotient._
 
-/* The content of this file makes the MetaRUL DSL syntax work. Changes in here
- * are unlikely to be necessary.
- */
+/** The content of this file makes the MetaRUL DSL syntax work. Changes in here
+  * are unlikely to be necessary.
+  *
+  * The `Network` type should be provided by dependency injection by extending
+  * from `Syntax` downstream.
+  */
+trait Syntax extends RuleGeneratorSyntax with RuleTransducerSyntax with ImplicitsSyntax {
+
+type Network <: AbstractNetwork
+
+trait AbstractNetwork { this: Network =>
+
+  def typ: NetworkType
+
+  def ~ (w: Int, n: Int, e: Int, s: Int): Segment =
+    Segment(this, Flags(w, n, e, s, if (typ == Symmetrical) Flag.Bi else Flag.InOut))
+
+  def ~ (flags: (Int, Int, Int, Int)): Segment =
+    this ~ (flags._1, flags._2, flags._3, flags._4)
+
+  // def ~ (flags: Flags): Segment = Segment(this, flags)
+
+  def ~> (that: Network): CoupleNetwork = CoupleNetwork(this, that)
+}
+
+/** The function that maps `Tiles` (meta syntax) to `IdTiles` (IID, Rot, Flip).
+  */
+type IdResolver = PartialFunction[Tile, IdTile]
 
 case class Segment(network: Network, flags: Flags) {
   def * (rf: RotFlip): Segment = copy(flags = flags * rf)
@@ -16,7 +41,7 @@ case class Segment(network: Network, flags: Flags) {
   def ~ (w: Int, n: Int, e: Int, s: Int): TupleSegment = TupleSegment(this, network~(w,n,e,s))
   def ~ (flags: (Int, Int, Int, Int)): TupleSegment = this ~ (flags._1, flags._2, flags._3, flags._4)
   def reverse: Segment = {
-    assert(network.typ != Network.AvenueLike || this != network~(Flags.SharedDiagLeft) && this != network~(Flags.SharedDiagRight),
+    assert(network.typ != AvenueLike || this != network~(Flags.SharedDiagLeft) && this != network~(Flags.SharedDiagRight),
       "reversing does not currently work for shared-tile diagonals") // TODO fix this
     copy(flags = flags.reverseFlags)
   }
@@ -41,8 +66,6 @@ private[meta] case class CoupleSegment(seg1: Segment, seg2: Segment) {
 }
 
 private[meta] case class TupleCoupleSegment(cseg1: CoupleSegment, cseg2: CoupleSegment)
-
-private[meta] sealed trait TileLike
 
 sealed trait SymTile extends TileLike {
   def symmetries: SymGroup
@@ -74,10 +97,8 @@ case class Tile(segs: Set[Segment]) extends SymTile {
 
   def toIdSymTile(implicit resolve: IdResolver) = new IdSymTile(symmetries, resolve(this))
 }
-
-trait TupleTileLike[A] extends TileLike {
-  def tile1: A
-  def tile2: A
+object Tile {
+  def apply(seg: Segment): Tile = Tile(Set(seg))
 }
 
 private[meta] case class TupleSymTile(tile1: SymTile, tile2: SymTile) extends TupleTileLike[SymTile]
@@ -117,45 +138,26 @@ private[meta] case class TupleCoupleTile(ctile1: CoupleTile, ctile2: CoupleTile)
   def | (that: IdSymTile): (Rule[SymTile], Rule[SymTile]) = (this.ctile1 | that, this.ctile2 | that)
 }
 
-object Tile {
-  def apply(seg: Segment): Tile = Tile(Set(seg))
-
-  private def projectTla(t: Tile, p: Flags => Flags): Tile = t.copy(segs =
-    t.segs.map(s => if (!s.network.isTla) s else s.copy(flags = p(s.flags)))
-    )
-  val projectTlaLeft = (t: Tile) => projectTla(t, _.spinLeft)
-  val projectTlaRight = (t: Tile) => projectTla(t, _.spinRight)
-
-  case object CopyTile
-}
-
-case class IdTile(id: Int, rf: RotFlip, mappedRepr: Quotient => Set[RotFlip] = identity) extends TileLike {
-  override def toString = f"0x$id%08X,${rf.rot},${rf.flip}"
-  def * (rf: RotFlip) = copy(rf = this.rf * rf)
-
-  override def equals(any: Any): Boolean = any match {
-    case IdTile(id, rf, mr) => id == this.id && rf == this.rf
-    case _ => false
-  }
-  override def hashCode: Int = id ^ rf.hashCode
-}
 object IdTile {
   /** This constructor can be used to connect metarule syntax to ordinary RUL2 code.
     */
   def apply(id: Int, rf: RotFlip, symmetries: SymGroup): IdSymTile = {
-    new IdSymTile(symmetries, IdTile(id, rf))
+    new IdSymTile(symmetries, internal.IdTile(id, rf))
   }
   def apply(id: Int, rf: RotFlip, symmetries: SymGroup, mappedRepr: Quotient => Set[RotFlip]): IdSymTile = {
-    new IdSymTile(symmetries, IdTile(id, rf, mappedRepr))
+    new IdSymTile(symmetries, internal.IdTile(id, rf, mappedRepr))
   }
   def apply(idTile: IdTile, symmetries: SymGroup): IdSymTile = {
     new IdSymTile(symmetries, idTile)
   }
   def apply(id: Int, rot: Int, flip: Int, symmetries: SymGroup): IdSymTile = {
-    new IdSymTile(symmetries, IdTile(id, RotFlip(rot, flip)))
+    new IdSymTile(symmetries, internal.IdTile(id, RotFlip(rot, flip)))
   }
   def apply(id: Int, rot: Int, flip: Int): IdTile = {
-    IdTile(id, RotFlip(rot, flip))
+    internal.IdTile(id, RotFlip(rot, flip))
+  }
+  def apply(id: Int, rf: RotFlip, mappedRepr: Quotient => Set[RotFlip] = identity): IdTile = {
+    internal.IdTile(id, rf, mappedRepr)
   }
 }
 
@@ -183,6 +185,30 @@ private[meta] class IdSymTile(val symmetries: SymGroup, idTile: IdTile) extends 
   def toIdSymTile(implicit resolve: IdResolver): this.type = this
 }
 
+}  // end of Syntax
+
+
+private[meta] sealed trait TileLike
+
+private[meta] sealed trait TupleTileLike[A] extends TileLike {
+  def tile1: A
+  def tile2: A
+}
+
+package internal {  // <-- to avoid name conflicts
+
+  /** Constructors are provided by Syntax#IdTile object. */
+  case class IdTile(id: Int, rf: RotFlip, mappedRepr: Quotient => Set[RotFlip] = identity) extends TileLike {
+    override def toString = f"0x$id%08X,${rf.rot},${rf.flip}"
+    def * (rf: RotFlip) = copy(rf = this.rf * rf)
+
+    override def equals(any: Any): Boolean = any match {
+      case IdTile(id, rf, mr) => id == this.id && rf == this.rf
+      case _ => false
+    }
+    override def hashCode: Int = id ^ rf.hashCode
+  }
+}
 
 import scala.reflect.ClassTag
 import scala.collection.IndexedSeqOptimized
@@ -200,13 +226,18 @@ class Rule[+A <: TileLike : ClassTag] private (ts: Array[A]) extends IndexedSeq[
 
 object Rule {
 
+  case object CopyTile
+
   def apply[A <: TileLike : ClassTag](a: A, b: A, c: A, d: A) = new Rule(Array(a, b, c, d))
 
   def apply(
     a: Int, ar: Byte, af: Byte,
     b: Int, br: Byte, bf: Byte,
     c: Int, cr: Byte, cf: Byte,
-    d: Int, dr: Byte, df: Byte): Rule[IdTile] = Rule(IdTile(a, ar, af), IdTile(b, br, bf), IdTile(c, cr, cf), IdTile(d, dr, df))
+    d: Int, dr: Byte, df: Byte): Rule[IdTile] = {
+      import internal.IdTile
+      Rule(IdTile(a, RotFlip(ar, af)), IdTile(b, RotFlip(br, bf)), IdTile(c, RotFlip(cr, cf)), IdTile(d, RotFlip(dr, df)))
+  }
 
   abstract class RuleBuilderLike[B <: TileLike : ClassTag, C] extends Builder[B, C] {
     private[Rule] var arr = new Array[B](4)
@@ -242,10 +273,10 @@ object Rule {
 
   private[meta] class PartialRule2[A <: TileLike : ClassTag, C] private[meta] (b: RuleBuilderLike[A, C]) {
     def | (tile: A): PartialRule3[A, C] = new PartialRule3(b += tile)
-    def | (tile: Tile.CopyTile.type): PartialRule3[A, C] = new PartialRule3(b += b.arr(0))
+    def | (tile: Rule.CopyTile.type): PartialRule3[A, C] = new PartialRule3(b += b.arr(0))
   }
   private[meta] class PartialRule3[A <: TileLike : ClassTag, C] private[meta] (b: RuleBuilderLike[A, C]) {
     def | (tile: A): C = (b += tile).result()
-    def | (tile: Tile.CopyTile.type): C = (b += b.arr(1)).result()
+    def | (tile: Rule.CopyTile.type): C = (b += b.arr(1)).result()
   }
 }

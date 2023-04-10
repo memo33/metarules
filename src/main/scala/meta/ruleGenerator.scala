@@ -1,14 +1,16 @@
 package metarules.meta
 
+trait RuleGeneratorSyntax { syntax: Syntax =>
+
 /** Needs to be implemented for generating RUL2 code for a specific project,
-  * along with an [[IdResolver]].
+  * along with an [[Syntax#IdResolver]].
   */
 trait RuleGenerator {
   /** The implementation of this is likely to change. After [[start]] has been
     * called, the generated Rules can be fetched from this queue.
     */
   val queue = new scala.collection.mutable.Queue[Rule[IdTile]]()
-  def % = Tile.CopyTile
+  def % = Rule.CopyTile
   /** A buffer for Rules to collect Rules before flushing them via
     * [[createRules]].
     */
@@ -46,3 +48,5 @@ private[meta] class RulesBuffer extends scala.collection.mutable.ArrayBuffer[Rul
     this += rules._2
   }
 }
+
+} // end of RuleGeneratorSyntax

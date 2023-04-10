@@ -151,7 +151,7 @@ package group {
 
     def ofFlags(flags: Flags): SymGroup =
       ofImpl(rf => flags == flags * rf)
-    def ofTile(tile: Tile): SymGroup =
+    def ofTile(tile: Syntax#Tile): SymGroup =
       ofImpl(rf => tile.segs == tile.segs.map(_ * rf))
 
     private[this] def ofImpl(has: RotFlip => Boolean): SymGroup = {

@@ -1,5 +1,7 @@
 package metarules.meta
 
+trait ImplicitsSyntax { syntax: Syntax =>
+
 /** Defines a number of implicit conversions most of which are needed to make
   * the MetaRUL syntax work.
   */
@@ -18,11 +20,11 @@ object Implicits extends LowPriorityImplicits {
   implicit def symTileToTupleSymTile(tile: SymTile): TupleSymTile = TupleSymTile(tile, tile)
   implicit def tupleTileToTupleSymTile(tt: TupleTile): TupleSymTile = TupleSymTile(tt.tile1, tt.tile2)
   implicit def partialTileRule2ToSymTileRule(rule: Rule.PartialRule2[Tile, Rule[Tile]]): Rule.PartialRule2[SymTile, Rule[SymTile]] = {
-    val res = rule | Tile.CopyTile | Tile.CopyTile
+    val res = rule | Rule.CopyTile | Rule.CopyTile
     new Rule.PartialRule2(Rule.newBuilder[SymTile] += res(0) += res(1))
   }
   implicit def partialTileRule3ToSymTileRule(rule: Rule.PartialRule3[Tile, Rule[Tile]]): Rule.PartialRule3[SymTile, Rule[SymTile]] = {
-    val res = rule | Tile.CopyTile
+    val res = rule | Rule.CopyTile
     new Rule.PartialRule3(Rule.newBuilder[SymTile] += res(0) += res(1) += res(2))
   }
 }
@@ -36,3 +38,5 @@ trait LowPriorityImplicits {
   implicit def tupleSegmentToTupleCoupleTile(ts: TupleSegment): TupleCoupleTile = Implicits.tupleTileToTupleCoupleTile(Implicits.tupleSegmentToTupleTile(ts))
   implicit def tupleSegmentToTupleSymTile(ts: TupleSegment): TupleSymTile = Implicits.tupleTileToTupleSymTile(Implicits.tupleSegmentToTupleTile(ts))
 }
+
+} // end of ImplicitsSyntax

@@ -120,7 +120,7 @@ Open the Main class [src/main/scala/module/Main.scala](https://github.com/NAMTea
 definition of `resolve` and `generator` by the following chunk of code:
 
 ```
-  import meta._, Network._, RotFlip._, Flags._, Implicits._
+  import meta._, syntax._, Network._, RotFlip._, Flags._, Implicits._
 
   val resolve = Map[Tile, IdTile](
     (Dirtroad~NS, IdTile(0x57000000, R0F0)),
@@ -164,11 +164,8 @@ example, is not advisable in general, but should be replaced by a more
 appropriate solution.
 
 
-Adding new networks and flags
------------------------------
-
-Any new networks need to be added to the file [networks.scala](src/main/scala/meta/networks.scala).
-Make sure that the existing metarule code in the NAM repository plays well with the networks you add.
+Custom network flags
+--------------------
 
 Flags used in metarules are similar to the network flags of the game, but there are some differences.
 You can use any integers as flags subject to the following conventions:

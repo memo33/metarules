@@ -2,7 +2,7 @@ name := "metarules"
 
 organization := "com.github.memo33"
 
-version := "0.4.0"
+version := "0.4.1-SNAPSHOT"
 
 licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
 
@@ -21,7 +21,7 @@ javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 
 console / initialCommands := """
 import metarules._, metarules.meta._
-import Implicits._, Network._, Flag._, Flags._, RotFlip._, Tile.{CopyTile => %}, group.SymGroup._
+import internal.DummyNetwork._, Implicits._, Flags._, RotFlip._, Rule.{CopyTile => %}, group.SymGroup._
 """
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.5" % "test"

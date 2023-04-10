@@ -2,8 +2,10 @@ package metarules.meta
 
 import RotFlip._
 import group.SymGroup
+
+trait RuleTransducerSyntax { syntax: Syntax =>
+
 import Implicits._
-import Network._
 
 /** The main logic to translate meta code (`Rule[Tile]`) to proper RUL2 code
   * (`Rule[IdTile]`). The crux of that is that a single meta rule can result in
@@ -193,3 +195,5 @@ object RuleTransducer {
     tileOrientationCache: collection.mutable.Map[Int, Set[RotFlip]] = collection.mutable.Map.empty,
     preprocess: Rule[SymTile] => Iterator[Rule[SymTile]] = defaultPreprocessor)
 }
+
+} // end of RuleTransducerSyntax
