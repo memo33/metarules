@@ -191,7 +191,7 @@ object RuleTransducer {
   val defaultPreprocessor: Rule[SymTile] => Iterator[Rule[SymTile]] = rule => Iterator(rule)
 
   case class Context(
-    resolve: IdResolver,
+    resolve: Tile => IdTile,
     tileOrientationCache: collection.mutable.Map[Int, Set[RotFlip]] = collection.mutable.Map.empty,
     preprocess: Rule[SymTile] => Iterator[Rule[SymTile]] = defaultPreprocessor)
 }

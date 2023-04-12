@@ -72,7 +72,7 @@ sealed trait SymTile extends TileLike {
   def representations: Quotient = symmetries.quotient
   def * (rf: RotFlip): SymTile
 
-  def toIdSymTile(implicit resolve: IdResolver): IdSymTile
+  def toIdSymTile(resolve: Tile => IdTile): IdSymTile
 }
 
 case class Tile(segs: Set[Segment]) extends SymTile {
@@ -95,7 +95,7 @@ case class Tile(segs: Set[Segment]) extends SymTile {
   }
   override def toString = segs.mkString(" & ")
 
-  def toIdSymTile(implicit resolve: IdResolver) = new IdSymTile(symmetries, resolve(this))
+  def toIdSymTile(resolve: Tile => IdTile) = new IdSymTile(symmetries, resolve(this))
 }
 object Tile {
   def apply(seg: Segment): Tile = Tile(Set(seg))
@@ -182,7 +182,7 @@ private[meta] class IdSymTile(val symmetries: SymGroup, idTile: IdTile) extends 
   def | (that: TupleCoupleTile): (Rule[SymTile], Rule[SymTile]) = (this | that.ctile1, this | that.ctile2)
   def | (cs: CoupleSegment): Rule[SymTile] = this | Implicits.coupleSegmentToCoupleTile(cs)
 
-  def toIdSymTile(implicit resolve: IdResolver): this.type = this
+  def toIdSymTile(resolve: Tile => IdTile): this.type = this
 }
 
 }  // end of Syntax
