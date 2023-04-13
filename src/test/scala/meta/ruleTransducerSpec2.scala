@@ -129,7 +129,7 @@ class RuleTransduceSpec2 extends WordSpec with Matchers {
        */
       RuleTransducer(Ave6m~ES & Ave6m~NE | (Road~>Ave6m)~NW & (Road~>Ave6m)~WS)(context).toSeq shouldBe Seq(
         Rule(0x51219E8E,3,0,0x00000700,1,0,0x51219E8E,3,0,0x51219E8E,1,0),
-        Rule(0x51219E8E,3,0,0x00000700,3,1,0x51219E8E,3,0,0x51219E8E,3,1))
+        Rule(0x51219E8E,1,1,0x00000700,1,0,0x51219E8E,1,1,0x51219E8E,1,0))  // here, 2nd tile is always non-flipped
     }
   }
 }

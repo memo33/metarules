@@ -187,7 +187,14 @@ object RuleTransducer {
         LOGGER.warning("unreachable orientation (1;2): " + result)
       }
 
-      result
+      if (bg.flipped && !bRepr.exists(_.flipped) || !bg.flipped && !bRepr.exists(!_.flipped)) {
+        // Usually, tile `a` is always nonflipped in result.
+        // If tile `b` does not correspond to valid (absolute) representation, we pick
+        // a more intuitive orientation of the rule instead to make the output easier to grasp.
+        result.map(_ * R2F1)
+      } else {
+        result
+      }
     }
   }
 
