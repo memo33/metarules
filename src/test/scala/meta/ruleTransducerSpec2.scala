@@ -2,6 +2,7 @@ package metarules.meta
 
 import org.scalatest.{WordSpec, Matchers}
 import RotFlip._
+import group.SymGroup.noSymmetries
 import internal.DummyNetwork._, Implicits._
 import Flags._
 
@@ -28,6 +29,36 @@ class RuleTransduceSpec2 extends WordSpec with Matchers {
   }
 
   "RuleTransducer" should {
+    "determine unique smallest representation" in {
+      for (ag <- RotFlip.values; bg <- RotFlip.values) {
+        val aId = 1
+        val bId = 2
+        val equivalentOrientations = Seq(
+          ((aId, ag), (bId, bg)),
+          // ((bId, bg * R2F0), (aId, ag * R2F0)),  // would fail, since we do not swap tiles in the output
+          // ((bId, bg * R0F1), (aId, ag * R0F1)),
+          ((aId, ag * R2F1), (bId, bg * R2F1)))
+        equivalentOrientations.filter(r => !RuleTransducer.hasSmallerEquivRepr(r._1._1, r._1._2, r._2._1, r._2._2)).toSet.size shouldBe 1
+      }
+    }
+
+    "determine unique smallest representation for equal IIDs" in {
+      for (ag <- RotFlip.values; bg <-RotFlip.values) {
+        val aId = 1
+        val equivalentOrientations1 = Seq(  // equal IDs
+          ((aId, ag), (aId, bg)),
+          // ((aId, bg * R2F0), (aId, ag * R2F0)),  // would fail, since we do not swap tiles in the output
+          // ((aId, bg * R0F1), (aId, ag * R0F1)),
+          ((aId, ag * R2F1), (aId, bg * R2F1)))
+        equivalentOrientations1.filter(r => !RuleTransducer.hasSmallerEquivRepr(r._1._1, r._1._2, r._2._1, r._2._2)).toSet.size shouldBe 1
+
+        val context = RuleTransducer.Context(resolver)
+        RuleTransducer(
+          IdTile(1, ag, noSymmetries) | IdTile(1, bg, noSymmetries) | IdTile(2, ag, noSymmetries) | IdTile(2, bg, noSymmetries)
+        )(context).toSeq shouldBe 'nonEmpty
+      }
+    }
+
     "detect ambiguities and take them into account in subsequent metarules" in {
       val context = RuleTransducer.Context(resolver, collection.mutable.Map.empty[Int, Set[RotFlip]])
       /* Initially, the possible absolute rotations of this tile are just these two.

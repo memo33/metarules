@@ -58,7 +58,10 @@ object RuleTransducer {
     * that is equivalent.
     */
   private[meta] def hasSmallerEquivRepr(aId: Int, ag: GroupElement, bId: Int, bg: GroupElement) = {
-    ag.flip == 1 || aId == bId && bg.flip == 0 && ag.rot > (bg * R2F0).rot
+    // Since we do not swap the left and right output tiles in any case, we do
+    // not treat the case of equal IDs in a special way anymore.
+    // Any duplicates should later be removed by the use of EquivRule.
+    ag.flip == 1
   }
 
   /** Determines possible orientation of the world map according to the
