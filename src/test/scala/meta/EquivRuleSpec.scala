@@ -52,6 +52,28 @@ class EquivRuleSpec extends WordSpec with Matchers {
       testNot(wrap(0x100, R0F0, 0x100, R2F0), wrap(0x100, R2F0, 0x100, R0F0))
       test   (wrap(0x100, R0F0, 0x100, R2F0), wrap(0x100, R2F1, 0x100, R0F1))
     }
+    "pass exhaustive test" in {
+      val rules = for (a <- RotFlip.values.toSeq; b <- RotFlip.values.toSeq; r <- Seq(wrap(0x100, a, 0x200, b), wrap(0x200, b, 0x100, a))) yield r
+      rules.groupBy(identity).values.forall(_.size == 4) shouldBe true
+      rules.groupBy(_.hashCode).values.forall(_.size == 4) shouldBe true
+      rules.toSet.size shouldBe (2 * 8 * 8 / 4)
+    }
+    "pass exhaustive test with equal IIDs" in {
+      val equivRotations = for (a <- RotFlip.values.toSeq; b <- RotFlip.values.toSeq) yield Seq((a,b), (a*R2F1,b*R2F1), (b*R0F1,a*R0F1), (b*R2F0,a*R2F0))
+      // check that equal rules are really equal
+      for (rfs <- equivRotations) {
+        val rules = rfs.map { case (a,b) => wrapSame(a,b) }
+        rules.toSet.size shouldBe 1
+        rules.map(_.hashCode).toSet.size shouldBe 1
+      }
+      // check that unequal rules are really unequal
+      val equivRules = equivRotations.map(_.map { case (a,b) => wrapSame(a,b) })
+      val m1 = equivRules.groupBy(identity).mapValues(_.size)  // consists of 4s and 2s (weird cases)
+      equivRotations.map(_.toSet).distinct.map(_.size) shouldBe equivRules.distinct.map(m1)
+      // check that unequal rules do not have hash collisions in this example
+      val m2 = equivRules.groupBy(_.hashCode).mapValues(_.size)
+      equivRotations.map(_.toSet).distinct.map(_.size) shouldBe equivRules.map(_.hashCode).distinct.map(m2)
+    }
   }
 }
 
