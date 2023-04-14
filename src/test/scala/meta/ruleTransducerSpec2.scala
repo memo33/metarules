@@ -1,8 +1,10 @@
 package metarules.meta
 
 import org.scalatest.{WordSpec, Matchers}
+import scala.collection.immutable.StringOps
 import RotFlip._
-import group.SymGroup.noSymmetries
+import group.SymGroup
+import group.SymGroup._
 import internal.DummyNetwork._, Implicits._
 import Flags._
 
@@ -22,9 +24,14 @@ class RuleTransduceSpec2 extends WordSpec with Matchers {
     add(L2Rhw2~NS & L1Rhw2~EW, 0x57201A10)
     add(L2Rhw2~NS, 0x57200000)
     add(Dirtroad~NS, 0x57000000)
+    add(Mis~NS, 0x57020000)
     add(Ave6m~ES & Ave6m~WS, 0x51219E8E)
     add(Ave6m~ES & Road~WS, 0x51218180)
     add(Road~ES & Road~SW, 0x00000700)
+    add(Road~NS, 0x00004B00)
+    add(L1Rhw2~NS, 0x57100000)
+    add(Dirtroad~NS & Dirtroad~EW, 0x57001A00)
+    add(L1Rhw2~WE & L1Rhw2~NS, 0x57101A10)
     map.toMap
   }
 
@@ -38,7 +45,7 @@ class RuleTransduceSpec2 extends WordSpec with Matchers {
           // ((bId, bg * R2F0), (aId, ag * R2F0)),  // would fail, since we do not swap tiles in the output
           // ((bId, bg * R0F1), (aId, ag * R0F1)),
           ((aId, ag * R2F1), (bId, bg * R2F1)))
-        equivalentOrientations.filter(r => !RuleTransducer.hasSmallerEquivRepr(r._1._1, r._1._2, r._2._1, r._2._2)).toSet.size shouldBe 1
+        equivalentOrientations.filter(r => !RuleTransducer.hasSmallerEquivRepr(r._1._1, r._1._2, r._2._1, r._2._2)).toSet should have size 1
       }
     }
 
@@ -50,7 +57,7 @@ class RuleTransduceSpec2 extends WordSpec with Matchers {
           // ((aId, bg * R2F0), (aId, ag * R2F0)),  // would fail, since we do not swap tiles in the output
           // ((aId, bg * R0F1), (aId, ag * R0F1)),
           ((aId, ag * R2F1), (aId, bg * R2F1)))
-        equivalentOrientations1.filter(r => !RuleTransducer.hasSmallerEquivRepr(r._1._1, r._1._2, r._2._1, r._2._2)).toSet.size shouldBe 1
+        equivalentOrientations1.filter(r => !RuleTransducer.hasSmallerEquivRepr(r._1._1, r._1._2, r._2._1, r._2._2)).toSet should have size 1
 
         val context = RuleTransducer.Context(resolver)
         RuleTransducer(
@@ -132,5 +139,201 @@ class RuleTransduceSpec2 extends WordSpec with Matchers {
         Rule(0x51219E8E,1,1,0x00000700,1,0,0x51219E8E,1,1,0x51219E8E,1,0))  // here, 2nd tile is always non-flipped
     }
   }
-}
 
+  "isReachable" should {
+    "work properly" in {
+      import RuleTransducer.isReachable
+      isReachable(Dih2A.quotient, R0F0, Dih2A.quotient, R0F0) should be (true)
+      isReachable(Dih2A.quotient, R0F0, Dih2A.quotient, R2F0) should be (false)
+      isReachable(Dih2A.quotient, R1F0, Dih4.quotient, R0F0) should be (true)
+      isReachable(Dih2A.quotient, R1F0, Dih4.quotient, R1F0) should be (true)
+      isReachable(Dih2A.quotient, R3F0, Dih4.quotient, R2F0) should be (true)
+      isReachable(Dih2A.quotient, R3F0, Dih4.quotient, R3F0) should be (true)
+      isReachable(Dih2A.quotient, R3F0, Dih4.quotient, R0F0) should be (false)
+      isReachable(Dih2A.quotient, R3F0, Dih4.quotient, R1F0) should be (false)
+      isReachable(Dih2A.quotient, R1F0, Dih4.quotient, R2F0) should be (false)
+      isReachable(Dih2A.quotient, R1F0, Dih4.quotient, R3F0) should be (false)
+    }
+  }
+
+  "hasSmallerEquivRepr" should {
+    val context = RuleTransducer.Context(resolver)
+    "work for tiles with same IID" in {
+      import RuleTransducer.hasSmallerEquivRepr
+      def count(ag: GroupElement, bg: GroupElement) {
+        val l1 = Seq(ag, ag * R2F1, bg * R0F1, bg * R2F0)
+        val l2 = Seq(bg, bg * R2F1, ag * R0F1, ag * R2F0)
+        withClue(ag + " " + bg + ":") {
+          (l1 zip l2).toSet map { tup: Tuple2[GroupElement, GroupElement] =>
+            !hasSmallerEquivRepr(42, tup._1, 42, tup._2)
+          } count (_ == true) should be (1)
+        }
+      }
+      val vs = Seq(R0F0, R1F0, R2F0, R3F0, R0F1, R1F1, R2F1, R3F1)
+      for (ag <- vs; bg <- vs) {
+        count(ag, bg)
+      }
+    }
+    "be correct for tiles with same IID" in {
+      RuleTransducer(Road~NS | Road~>Road~WE)(context).toSeq.size should be (RuleTransducer(L1Rhw2~NS | Road~>L1Rhw2~WE)(context).toSeq.size)
+    }
+  }
+
+  "possibleMapOrientation" should {
+    "pass test cases" in {
+      import RuleTransducer.possibleMapOrientation
+      possibleMapOrientation(Dih4.quotient, R0F0, Dih4.quotient, R0F0) should be (Set(R0F0))
+      possibleMapOrientation(Dih4.quotient, R1F0, Dih4.quotient, R1F0) should be (Set(R1F0))
+      possibleMapOrientation(Dih4.quotient, R0F1, Dih4.quotient, R0F1) should be (Set(R0F1))
+
+      possibleMapOrientation(Dih4.quotient, R0F0, Dih2A.quotient, R0F0) should be (Set(R0F0))
+      possibleMapOrientation(Dih4.quotient, R0F0, Dih2A.quotient, R1F0) should be (Set(R0F0))
+      possibleMapOrientation(Dih4.quotient, R0F0, Dih2A.quotient, R2F0) should be ('empty)
+      possibleMapOrientation(Dih4.quotient, R0F0, Dih2A.quotient, R0F1) should be ('empty)
+
+      possibleMapOrientation(Dih2A.quotient, R0F0, Dih2A.quotient, R0F0) should be (Set(R0F0, R3F0))
+      possibleMapOrientation(Dih2A.quotient, R1F0, Dih2A.quotient, R1F0) should be (Set(R0F0, R1F0))
+      possibleMapOrientation(Dih2A.quotient, R0F0, Dih2A.quotient, R1F0) should be (Set(R0F0))
+      possibleMapOrientation(Dih2A.quotient, R1F0, Dih2A.quotient, R0F0) should be (Set(R0F0))
+
+      possibleMapOrientation(Dih2A.quotient, R0F0, Cyc2B.quotient, R0F0) should be (Set(R0F0, R3F0))
+      possibleMapOrientation(Dih2A.quotient, R0F0, Cyc2B.quotient, R1F0) should be (Set(R0F0, R3F0))
+
+      possibleMapOrientation(Cyc2B.quotient, R0F0, Cyc2B.quotient, R2F0) should be (Set(R0F0, R1F0, R2F0, R3F0))
+      possibleMapOrientation(Cyc2B.quotient, R0F0, Cyc2B.quotient, R1F0) should be (Set(R0F0, R1F0, R2F0, R3F0))
+
+      for (sg <- SymGroup.values; h <- RotFlip.values) {
+        possibleMapOrientation(sg.quotient, R0F0, Cyc1.quotient, h) should be (sg.quotient.map((rf: RotFlip) => R0F0 / rf))
+      }
+    }
+  }
+
+  "possibleMapOrientation" should {
+    import RuleTransducer._
+    import group.Quotient
+    "coincide with isReachable" in {
+      for (aRepr <- Quotient.values; bRepr <- Quotient.values;
+           ag <- RotFlip.values; bg <- RotFlip.values if isReachable(aRepr, ag, bRepr, bg)) {
+        possibleMapOrientation(aRepr, ag, bRepr, bg) should not be ('empty)
+      }
+      val aRepr = Set(R0F1, R1F1, R2F1, R3F1); val bRepr = Quotient.Cyc2A
+      isReachable(aRepr, R1F0, bRepr, R1F0) should be (false)
+      possibleMapOrientation(aRepr, R1F0, bRepr, R1F0) should be ('empty)
+    }
+  }
+
+  class DummyIdSymTile(override val id: Int, override val rf: RotFlip, override val symmetries: SymGroup) extends IdSymTile(null, IdTile(0, null))
+  def DIST(id: Int, rf: RotFlip, sg: SymGroup) = new DummyIdSymTile(id, rf, sg)
+
+  "RuleTransducer" should {
+    import RuleTransducer.createRules
+    implicit val context = RuleTransducer.Context(resolver)
+    val c = DIST(0x3000, R0F0, Cyc1)
+    val d = DIST(0x4000, R0F0, Cyc1)
+    val s = Seq(
+      (DIST(0x1000, R0F0, Dih2A), DIST(0x2000, R0F0, Dih2A), 2),
+      (DIST(0x1000, R0F0, Dih2A), DIST(0x2000, R1F0, Dih2A), 4),
+      (DIST(0x1000, R0F0, Dih2A), DIST(0x1000, R0F0, Dih2A), 2),  // debatable since ambiguous
+
+      (DIST(0x1000, R0F0, Dih2A), DIST(0x2000, R0F0, Cyc1), 4),
+
+      (DIST(0x1000, R0F0, Cyc1),  DIST(0x2000, R0F0, Cyc1), 1),
+      (DIST(0x1000, R0F0, Cyc1),  DIST(0x1000, R0F0, Cyc1), 1),
+
+      (DIST(0x1000, R0F0, Cyc2B), DIST(0x2000, R0F0, Cyc2B), 2),
+      (DIST(0x1000, R0F0, Cyc2B), DIST(0x1000, R0F0, Cyc2B), 2),
+      (DIST(0x1000, R0F0, Dih2A), DIST(0x2000, R0F0, Cyc2B), 4),
+
+      (DIST(0x1000, R0F0, Dih2A), DIST(0x2000, R0F0, Dih4), 4),
+      (DIST(0x1000, R0F0, Dih4),  DIST(0x2000, R0F0, Dih4), 4)
+    )
+
+    "generate correct number of rules" in {
+      for ((a, b, x) <- s) {
+        val rules = createRules(Rule(a,b,c,d), context.tileOrientationCache).toIterable
+        withClue(a.symmetries + " " + b.symmetries + "\n" + rules.mkString("\n")) {
+          rules should have size (x)
+        }
+      }
+    }
+
+    "produce proper output orientation for orth asymm overrides" in {
+      val rule = Mis~EW | Dirtroad~EW | Mis~EW | Mis~EW
+      rule(0).symmetries should be (Cyc2B)
+      rule(1).symmetries should be (Dih2A)
+      rule(3).symmetries should be (Cyc2B)
+      for (r <- RuleTransducer(rule)) withClue(r) {
+        r(2).rf should be (r(0).rf)
+        r(3).rf should be (r(0).rf)
+      }
+    }
+
+    "produce proper output orientation for orth symm overrides" in {
+      val rule = L2Rhw2~WE | Dirtroad~WE & L1Rhw2~NS | L2Rhw2~WE | L2Rhw2~WE & L1Rhw2~NS
+      rule foreach (_.symmetries should be (Dih2A))
+      for (r <- RuleTransducer(rule)) withClue(r) {
+        r(2).rf should be (r(0).rf)
+        r(3).rf should be (r(0).rf)
+      }
+    }
+
+    def parseRules(text: String): Seq[Rule[IdTile]] = {
+      new StringOps(text).lines.map(_.split(";", 2)(0).trim).filterNot(_.isEmpty).map[Rule[IdTile]] { line =>
+        line.split(",|=").grouped(3).toSeq.map(tup =>
+          IdTile(java.lang.Long.decode(tup(0)).toInt, RotFlip(tup(1).toInt, tup(2).toInt))
+        )(scala.collection.breakOut)
+      }
+    }.toSeq
+
+    def compareRules(a: Seq[Rule[IdTile]], b: Seq[Rule[IdTile]]) {
+      a should have size b.size
+      val sa = (a map (_.toString)).sorted
+      val sb = (b map (_.toString)).sorted
+      for ((r1, r2) <- sa zip sb) withClue(r1 + " <- auto generated\n" + r2 + " <- desired\n") {
+        r1 should be (r2)
+      }
+    }
+
+    "produce proper output for symm +intersections" in {
+      val rules = Seq(
+        L1Rhw2~WE               | Dirtroad~WE & Dirtroad~NS | L1Rhw2~WE               | L1Rhw2~WE & Dirtroad~NS,
+        L1Rhw2~WE & Dirtroad~NS | Dirtroad~WE               | L1Rhw2~WE & Dirtroad~NS | L1Rhw2~WE,
+        L1Rhw2~WE               | Dirtroad~WE & L1Rhw2~NS   | L1Rhw2~WE               | L1Rhw2~WE & L1Rhw2~NS,
+        L1Rhw2~WE & L1Rhw2~NS   | Dirtroad~WE               | L1Rhw2~WE & L1Rhw2~NS   | L1Rhw2~WE )
+
+      // to be sure, check symmetries first
+      rules(0)(0).symmetries should be (Dih2A)
+      rules(0)(1).symmetries should be (Dih4)
+      rules(0)(3).symmetries should be (Dih2A)
+      rules(1)(1).symmetries should be (Dih2A)
+      rules(2)(1).symmetries should be (Dih2A)
+      rules(2)(3).symmetries should be (Dih4)
+
+      val autoRules = rules.flatMap(RuleTransducer(_)).toSeq
+
+      val matchRules = parseRules("""
+        ;single in
+        0x57100000,1,0,0x57001A00,0,0=0x57100000,1,0,0x57101A00,1,0
+        0x57100000,1,0,0x57001A00,1,0=0x57100000,1,0,0x57101A00,1,0
+        0x57100000,3,0,0x57001A00,2,0=0x57100000,3,0,0x57101A00,3,0
+        0x57100000,3,0,0x57001A00,3,0=0x57100000,3,0,0x57101A00,3,0
+        ;single out
+        0x57101A00,1,0,0x57000000,1,0=0x57101A00,1,0,0x57100000,1,0
+        0x57101A00,3,0,0x57000000,3,0=0x57101A00,3,0,0x57100000,3,0
+
+        ;double in
+        0x57100000,1,0,0x57101A00,2,0=0x57100000,1,0,0x57101A10,1,0
+        0x57100000,3,0,0x57101A00,0,0=0x57100000,3,0,0x57101A10,3,0
+        ;double out
+        0x57101A10,1,0,0x57000000,1,0=0x57101A10,1,0,0x57100000,1,0
+        0x57101A10,3,0,0x57000000,3,0=0x57101A10,3,0,0x57100000,3,0
+        ;double stability
+        0x57101A10,0,0,0x57000000,1,0=0x57101A10,0,0,0x57100000,1,0
+        0x57101A10,2,0,0x57000000,3,0=0x57101A10,2,0,0x57100000,3,0
+        0x57100000,1,0,0x57101A00,0,0=0x57100000,1,0,0x57101A10,0,0
+        0x57100000,3,0,0x57101A00,2,0=0x57100000,3,0,0x57101A10,2,0
+      """)
+      compareRules(autoRules, matchRules)
+    }
+  }
+}
