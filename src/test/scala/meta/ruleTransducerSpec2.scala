@@ -1,6 +1,7 @@
 package metarules.meta
 
-import org.scalatest.{WordSpec, Matchers}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import scala.collection.immutable.StringOps
 import RotFlip._
 import group.SymGroup
@@ -8,7 +9,7 @@ import group.SymGroup._
 import internal.DummyNetwork._, Implicits._
 import Flags._
 
-class RuleTransduceSpec2 extends WordSpec with Matchers {
+class RuleTransduceSpec2 extends AnyWordSpec with Matchers {
 
   val resolver = {
     val map = scala.collection.mutable.Map.empty[Tile, IdTile]

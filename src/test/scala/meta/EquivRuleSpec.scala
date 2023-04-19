@@ -1,9 +1,10 @@
 package metarules.meta
 
-import org.scalatest.{WordSpec, Matchers}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import RotFlip._
 
-class EquivRuleSpec extends WordSpec with Matchers {
+class EquivRuleSpec extends AnyWordSpec with Matchers {
 
   "equals and hashcode" should {
     def wrap(id1: Int, rf1: RotFlip, id2: Int, rf2: RotFlip): EquivRule = {

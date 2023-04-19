@@ -1,8 +1,9 @@
 package metarules.meta
 
-import org.scalatest.{WordSpec, Matchers}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 
-class RuleGeneratorSpec extends WordSpec with Matchers {
+class RuleGeneratorSpec extends AnyWordSpec with Matchers {
 
   "RuleGenerator" should {
     "should support meta syntax and RUL2-compatibility syntax" in {

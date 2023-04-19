@@ -1,9 +1,10 @@
 package metarules.pathing
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import Bezier._
 
-class BezierTest extends WordSpec with Matchers {
+class BezierTest extends AnyWordSpec with Matchers {
 
   val p0 = Point(2,-6,0)
   val p0b = Point(2,6,0)

@@ -1,8 +1,9 @@
 package metarules.meta
 
-import org.scalatest.{WordSpec, Matchers}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 
-class metaSpec extends WordSpec with Matchers {
+class metaSpec extends AnyWordSpec with Matchers {
 
   "Rule use cases" should {
     "be compilable" in {

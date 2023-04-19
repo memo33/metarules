@@ -1,10 +1,11 @@
 package metarules.pathing
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import Trimming._
 import Bezier._
 
-class TrimmingSpec extends WordSpec with Matchers {
+class TrimmingSpec extends AnyWordSpec with Matchers {
 
   "splitAtLine" should {
     "yield expected result" in {
