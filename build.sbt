@@ -6,18 +6,19 @@ version := "0.5.1-SNAPSHOT"
 
 licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
 
-scalaVersion := "2.11.12"
+scalaVersion := "2.13.10"
 
 scalacOptions ++= Seq(
   "-unchecked",
   "-deprecation",
   "-feature",
-  //"-Yinline-warnings",
-  "-optimize",
+  // "-opt-warnings:at-inline-failed-summary",
+  "-opt:l:inline",
+  // "-opt-inline-from:**",  // leads to compiler errors with scala-2.13
   "-encoding", "UTF-8",
-  "-target:jvm-1.7")
+  "-release:8")
 
-javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
+javacOptions ++= Seq("--release", "8")
 
 console / initialCommands := """
 import metarules._, metarules.meta._

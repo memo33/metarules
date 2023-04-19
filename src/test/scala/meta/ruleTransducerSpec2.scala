@@ -280,9 +280,9 @@ class RuleTransduceSpec2 extends AnyWordSpec with Matchers {
 
     def parseRules(text: String): Seq[Rule[IdTile]] = {
       new StringOps(text).lines.map(_.split(";", 2)(0).trim).filterNot(_.isEmpty).map[Rule[IdTile]] { line =>
-        line.split(",|=").grouped(3).toSeq.map(tup =>
-          IdTile(java.lang.Long.decode(tup(0)).toInt, RotFlip(tup(1).toInt, tup(2).toInt))
-        )(scala.collection.breakOut)
+        val ts = line.split(",|=").grouped(3).toSeq.map(tup =>
+          IdTile(java.lang.Long.decode(tup(0)).toInt, RotFlip(tup(1).toInt, tup(2).toInt)))
+        Rule(ts(0), ts(1), ts(2), ts(3))
       }
     }.toSeq
 

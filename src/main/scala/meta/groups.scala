@@ -65,10 +65,10 @@ package group {
     override def stringPrefix = name
 
     def iterator: Iterator[GroupElement] = rep.iterator
-    def -(elem: GroupElement): SortedSet[GroupElement] = rep - elem
-    def +(elem: GroupElement): SortedSet[GroupElement] = rep + elem
+    def excl(elem: GroupElement): SortedSet[GroupElement] = rep - elem
+    def incl(elem: GroupElement): SortedSet[GroupElement] = rep + elem
     def contains(elem: GroupElement): Boolean = rep.contains(elem)
-    def keysIteratorFrom(start: GroupElement): Iterator[GroupElement] = rep.keysIteratorFrom(start)
+    def iteratorFrom(start: GroupElement): Iterator[GroupElement] = rep.iteratorFrom(start)
     implicit def ordering: Ordering[GroupElement] = rep.ordering
     def rangeImpl(from: Option[GroupElement],until: Option[GroupElement]): SortedSet[GroupElement] = rep.rangeImpl(from, until)
   }

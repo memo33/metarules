@@ -1,6 +1,7 @@
 package metarules.pathing
 
 import scala.collection._
+import scala.collection.immutable.Seq
 import Bezier._
 import io.github.memo33.scdbpf.Sc4Path, Sc4Path.{TransportType => TT, _}, Cardinal._
 
@@ -61,14 +62,14 @@ abstract class Intersection {
     val paths: immutable.Seq[Path] = pss.map { case (ps, tt, cn) =>
       Path(comment = None, transportType = tt, classNumber = cn,
         entry = card(ps.head), exit = card(ps.last),
-        coords = ps.map(pointToCoord)(breakOut))
-    } (breakOut)
+        coords = ps.map(pointToCoord))
+    }
     val stopPaths: immutable.Seq[StopPath] = stopPoints.map { case (Line(a, b), tt, cn, uk) =>
       StopPath(comment = None, transportType = tt, classNumber = cn, uk = uk,
         entry = if (uk) card(b) else card(a),
         exit = Cardinal.Special,
         coord = if (uk) a else b)
-    } (breakOut)
+    }
     Sc4Path(paths = paths, stopPaths = stopPaths, terrainVariance = false) // TODO set terrain variance?
   }
 

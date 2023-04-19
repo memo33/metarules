@@ -114,7 +114,7 @@ object RuleTransducer {
     */
   private[meta] def computeExtendedRepr(repr: Set[RotFlip], rhsOrientations: Iterable[RotFlip]): Set[RotFlip] = {
     val g0 = rhsOrientations.head
-    val gs = (RotFlip.ValueSet.newBuilder ++= rhsOrientations.tail).result
+    val gs = (RotFlip.ValueSet.newBuilder ++= rhsOrientations.tail).result()
     if (gs.isEmpty) {
       // this can happen when the other RHS had the ambiguity, so there is nothing to do
       repr
@@ -144,8 +144,8 @@ object RuleTransducer {
     for {
       // TODO possibly, factor needs to be refined in case of equal IIDs
       fac <- if (!a.symmetries.contains(R2F1) || !b.symmetries.contains(R2F1)) Seq(R0F0, R2F1) else Seq(R0F0)
-      as <- a.symmetries; ag = a.rf * as * fac
-      bs <- b.symmetries; bg = b.rf * bs * fac
+      as <- a.symmetries.iterator; ag = a.rf * as * fac
+      bs <- b.symmetries.iterator; bg = b.rf * bs * fac
       if !hasSmallerEquivRepr(a.id, ag, b.id, bg)
       if isReachable(aRepr, ag, bRepr, bg)
       rhs = mappedRhs(fac, findRhsOrientation(ag/fac, a.symmetries, aRepr,
