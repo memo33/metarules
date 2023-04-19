@@ -27,7 +27,7 @@ import internal.DummyNetwork._, Implicits._, Flags._, RotFlip._, Rule.{CopyTile 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.15" % "test"
 
 
-libraryDependencies += "com.github.memo33" %% "scalaenum" % "0.1.4" from "https://github.com/memo33/scalaenum/releases/download/v0.1.4/scalaenum_2.11-0.1.4.jar"
+libraryDependencies += "io.github.memo33" %% "scalaenum" % "0.2.0"
 
 
 // the following are transitive dependencies of scdbpf

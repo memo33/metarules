@@ -1,6 +1,7 @@
 package metarules.meta
 
 import scala.collection.immutable.SortedSet
+import io.github.memo33.scalaenum
 import RotFlip.GroupElement
 
 /** The eight rotations of a tile, e.g. in an override rule.
