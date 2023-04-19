@@ -2,7 +2,6 @@ package metarules.meta
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import scala.collection.immutable.StringOps
 import RotFlip._
 import group.SymGroup
 import group.SymGroup._
@@ -63,7 +62,7 @@ class RuleTransduceSpec2 extends AnyWordSpec with Matchers {
         val context = RuleTransducer.Context(resolver)
         RuleTransducer(
           IdTile(1, ag, noSymmetries) | IdTile(1, bg, noSymmetries) | IdTile(2, ag, noSymmetries) | IdTile(2, bg, noSymmetries)
-        )(context).toSeq shouldBe 'nonEmpty
+        )(context).toSeq shouldBe Symbol("nonEmpty")
       }
     }
 
@@ -161,10 +160,10 @@ class RuleTransduceSpec2 extends AnyWordSpec with Matchers {
     val context = RuleTransducer.Context(resolver)
     "work for tiles with same IID" in {
       import RuleTransducer.hasSmallerEquivRepr
-      def count(ag: GroupElement, bg: GroupElement) {
+      def count(ag: GroupElement, bg: GroupElement): Unit = {
         val l1 = Seq(ag, ag * R2F1, bg * R0F1, bg * R2F0)
         val l2 = Seq(bg, bg * R2F1, ag * R0F1, ag * R2F0)
-        withClue(ag + " " + bg + ":") {
+        withClue(s"$ag $bg:") {
           (l1 zip l2).toSet map { tup: Tuple2[GroupElement, GroupElement] =>
             !hasSmallerEquivRepr(42, tup._1, 42, tup._2)
           } count (_ == true) should be (1)
@@ -189,8 +188,8 @@ class RuleTransduceSpec2 extends AnyWordSpec with Matchers {
 
       possibleMapOrientation(Dih4.quotient, R0F0, Dih2A.quotient, R0F0) should be (Set(R0F0))
       possibleMapOrientation(Dih4.quotient, R0F0, Dih2A.quotient, R1F0) should be (Set(R0F0))
-      possibleMapOrientation(Dih4.quotient, R0F0, Dih2A.quotient, R2F0) should be ('empty)
-      possibleMapOrientation(Dih4.quotient, R0F0, Dih2A.quotient, R0F1) should be ('empty)
+      possibleMapOrientation(Dih4.quotient, R0F0, Dih2A.quotient, R2F0) should be (Symbol("empty"))
+      possibleMapOrientation(Dih4.quotient, R0F0, Dih2A.quotient, R0F1) should be (Symbol("empty"))
 
       possibleMapOrientation(Dih2A.quotient, R0F0, Dih2A.quotient, R0F0) should be (Set(R0F0, R3F0))
       possibleMapOrientation(Dih2A.quotient, R1F0, Dih2A.quotient, R1F0) should be (Set(R0F0, R1F0))
@@ -215,11 +214,11 @@ class RuleTransduceSpec2 extends AnyWordSpec with Matchers {
     "coincide with isReachable" in {
       for (aRepr <- Quotient.values; bRepr <- Quotient.values;
            ag <- RotFlip.values; bg <- RotFlip.values if isReachable(aRepr, ag, bRepr, bg)) {
-        possibleMapOrientation(aRepr, ag, bRepr, bg) should not be ('empty)
+        possibleMapOrientation(aRepr, ag, bRepr, bg) should not be (Symbol("empty"))
       }
       val aRepr = Set(R0F1, R1F1, R2F1, R3F1); val bRepr = Quotient.Cyc2A
       isReachable(aRepr, R1F0, bRepr, R1F0) should be (false)
-      possibleMapOrientation(aRepr, R1F0, bRepr, R1F0) should be ('empty)
+      possibleMapOrientation(aRepr, R1F0, bRepr, R1F0) should be (Symbol("empty"))
     }
   }
 
@@ -251,8 +250,8 @@ class RuleTransduceSpec2 extends AnyWordSpec with Matchers {
 
     "generate correct number of rules" in {
       for ((a, b, x) <- s) {
-        val rules = createRules(Rule(a,b,c,d), context.tileOrientationCache).toIterable
-        withClue(a.symmetries + " " + b.symmetries + "\n" + rules.mkString("\n")) {
+        val rules = createRules(Rule(a,b,c,d), context.tileOrientationCache).to(Iterable)
+        withClue(s"${a.symmetries} ${b.symmetries}\n${rules.mkString("\n")}") {
           rules should have size (x)
         }
       }
@@ -279,14 +278,14 @@ class RuleTransduceSpec2 extends AnyWordSpec with Matchers {
     }
 
     def parseRules(text: String): Seq[Rule[IdTile]] = {
-      new StringOps(text).lines.map(_.split(";", 2)(0).trim).filterNot(_.isEmpty).map[Rule[IdTile]] { line =>
+      text.linesIterator.map(_.split(";", 2)(0).trim).filterNot(_.isEmpty).map[Rule[IdTile]] { line =>
         val ts = line.split(",|=").grouped(3).toSeq.map(tup =>
           IdTile(java.lang.Long.decode(tup(0)).toInt, RotFlip(tup(1).toInt, tup(2).toInt)))
         Rule(ts(0), ts(1), ts(2), ts(3))
       }
     }.toSeq
 
-    def compareRules(a: Seq[Rule[IdTile]], b: Seq[Rule[IdTile]]) {
+    def compareRules(a: Seq[Rule[IdTile]], b: Seq[Rule[IdTile]]): Unit = {
       a should have size b.size
       val sa = (a map (_.toString)).sorted
       val sb = (b map (_.toString)).sorted

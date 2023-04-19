@@ -35,7 +35,7 @@ object RuleTransducer {
 
   val LOGGER = java.util.logging.Logger.getLogger("networkaddonmod")
 
-  def apply(rule: Rule[SymTile])(implicit context: Context): TraversableOnce[Rule[IdTile]] = {
+  def apply(rule: Rule[SymTile])(implicit context: Context): Iterator[Rule[IdTile]] = {
     val input = context.preprocess(rule)
     val inputNonEmpty = input.nonEmpty
     val result = input.flatMap(rule => createRules(rule.map(_.toIdSymTile(context.resolve)), context.tileOrientationCache))
@@ -131,7 +131,7 @@ object RuleTransducer {
     }
   }
 
-  private[meta] def createRules(rule: Rule[IdSymTile], tileOrientationCache: collection.mutable.Map[Int, Set[RotFlip]]): TraversableOnce[Rule[IdTile]] = {
+  private[meta] def createRules(rule: Rule[IdSymTile], tileOrientationCache: collection.mutable.Map[Int, Set[RotFlip]]): Iterator[Rule[IdTile]] = {
     val a = rule(0); val b = rule(1); val c = rule(2); val d = rule(3)
     val aRepr = tileOrientationCache.getOrElse(a.id, a.repr)
     val bRepr = tileOrientationCache.getOrElse(b.id, b.repr)
@@ -143,7 +143,7 @@ object RuleTransducer {
 
     for {
       // TODO possibly, factor needs to be refined in case of equal IIDs
-      fac <- if (!a.symmetries.contains(R2F1) || !b.symmetries.contains(R2F1)) Seq(R0F0, R2F1) else Seq(R0F0)
+      fac <- if (!a.symmetries.contains(R2F1) || !b.symmetries.contains(R2F1)) Iterator(R0F0, R2F1) else Iterator(R0F0)
       as <- a.symmetries.iterator; ag = a.rf * as * fac
       bs <- b.symmetries.iterator; bg = b.rf * bs * fac
       if !hasSmallerEquivRepr(a.id, ag, b.id, bg)

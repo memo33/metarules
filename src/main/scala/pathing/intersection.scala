@@ -26,9 +26,9 @@ abstract class Intersection {
   val MinDist = 0.5 // half a meter
   val MaxAngle = 0.11 // about 6.3 degree
 
-  def yieldConnections(tt: TT): TraversableOnce[Connection]
+  def yieldConnections(tt: TT): IterableOnce[Connection]
 
-  def yieldConnectionStops(tt: TT): TraversableOnce[ConnectionStop]
+  def yieldConnectionStops(tt: TT): IterableOnce[ConnectionStop]
 
   /** Calculates the points of a curve with a straight start and end section.
     */
@@ -57,6 +57,7 @@ abstract class Intersection {
         case Point(-8,_,_) => West
         case Point(_,8,_) => North
         case Point(_,-8,_) => South
+        case _ => throw new MatchError(s"point should be on tile boundary: $p")
       }
     }
     val paths: immutable.Seq[Path] = pss.map { case (ps, tt, cn) =>
@@ -75,7 +76,7 @@ abstract class Intersection {
 
   def buildSc4Path: Sc4Path = {
     val pss: Seq[(Points, TT, Int)] = TT.values.toSeq.flatMap { tt =>
-      yieldConnections(tt).toSeq flatMap {
+      yieldConnections(tt).iterator.to(Seq) flatMap {
         case CurvedConnection(from, start, to, end, cn) =>
           Trimming.trimToTile(drawCurve(from.p1, from intersect start, to intersect end, to.p2)).map((_, tt, cn))
         case StraightConnection(line, cn) =>
@@ -83,7 +84,7 @@ abstract class Intersection {
       }
     }
     val stopPoints: Seq[(Line, TT, Int, Boolean)] = TT.values.toSeq.flatMap { tt =>
-      yieldConnectionStops(tt).toSeq flatMap {
+      yieldConnectionStops(tt).iterator.to(Seq) flatMap {
         case ConnectionStop(line, stopLine, cn, uk) => {
           val interruptedLine = if (!uk) Seq(line.p1, line intersect stopLine) else Seq(line intersect stopLine, line.p2)
           Trimming.trimToTile(interruptedLine) map { qs =>

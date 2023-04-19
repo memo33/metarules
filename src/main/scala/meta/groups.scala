@@ -62,7 +62,7 @@ package group {
 
   sealed trait GSet extends SortedSet[GroupElement] { this: group.ValName =>
     protected val rep: RotFlip.ValueSet
-    override def stringPrefix = name
+    override def className = name
 
     def iterator: Iterator[GroupElement] = rep.iterator
     def excl(elem: GroupElement): SortedSet[GroupElement] = rep - elem

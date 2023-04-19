@@ -36,7 +36,7 @@ type IdResolver = PartialFunction[Tile, IdTile]
 
 case class Segment(network: Network, flags: Flags) {
   def * (rf: RotFlip): Segment = copy(flags = flags * rf)
-  override def toString: String = network + "~" + flags
+  override def toString: String = s"$network~$flags"
 
   def ~ (w: Int, n: Int, e: Int, s: Int): TupleSegment = TupleSegment(this, network~(w,n,e,s))
   def ~ (flags: (Int, Int, Int, Int)): TupleSegment = this ~ (flags._1, flags._2, flags._3, flags._4)
@@ -50,7 +50,7 @@ case class Segment(network: Network, flags: Flags) {
 }
 
 private[meta] case class TupleSegment(seg1: Segment, seg2: Segment) {
-  override def toString: String = seg1 + "~" + seg2.flags
+  override def toString: String = s"$seg1~${seg2.flags}"
 }
 
 private[meta] case class CoupleNetwork(network1: Network, network2: Network) {
