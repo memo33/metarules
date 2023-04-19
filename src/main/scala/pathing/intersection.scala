@@ -2,7 +2,7 @@ package metarules.pathing
 
 import scala.collection._
 import Bezier._
-import scdbpf.Sc4Path, Sc4Path.{TransportType => TT, _}, Cardinal._
+import io.github.memo33.scdbpf.Sc4Path, Sc4Path.{TransportType => TT, _}, Cardinal._
 
 abstract class Connection
 /** Curved connection in the following format:

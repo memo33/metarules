@@ -1,6 +1,6 @@
 package metarules.pathing
 
-import scdbpf.DbpfUtil.{Dihedral, RotFlip}
+import io.github.memo33.scdbpf.DbpfUtil.{Dihedral, RotFlip}
 
 object Bezier {
 

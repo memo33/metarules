@@ -26,24 +26,6 @@ import internal.DummyNetwork._, Implicits._, Flags._, RotFlip._, Rule.{CopyTile 
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.15" % "test"
 
-
 libraryDependencies += "io.github.memo33" %% "scalaenum" % "0.2.0"
 
-
-// the following are transitive dependencies of scdbpf
-
-libraryDependencies += "com.jsuereth" %% "scala-arm" % "1.4"
-
-libraryDependencies += "org.parboiled" %% "parboiled-scala" % "1.1.6"
-
-libraryDependencies += "com.propensive" %% "rapture-io" % "0.9.1"
-
-libraryDependencies += "com.propensive" %% "rapture-core" % "0.9.0"
-
-libraryDependencies += "com.github.memo33" %% "scala-unsigned" % "0.1.3" from "https://github.com/memo33/scala-unsigned/releases/download/v0.1.3/scala-unsigned_2.11-0.1.3.jar"
-
-libraryDependencies += "com.github.memo33" % "jsquish" % "2.0.1" from "https://github.com/memo33/jsquish/releases/download/v2.0.1/jsquish-2.0.1.jar"
-
-libraryDependencies += "ps.tricerato" %% "pureimage" % "0.1.1" from "https://github.com/memo33/scdbpf/releases/download/v0.1.7/pureimage_2.11-0.1.1.jar"
-
-libraryDependencies += "com.github.memo33" %% "scdbpf" % "0.1.10" from "https://github.com/memo33/scdbpf/releases/download/v0.1.10/scdbpf_2.11.jar"
+libraryDependencies += "io.github.memo33" %% "scdbpf" % "0.2.0"

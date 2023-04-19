@@ -1,5 +1,6 @@
 package metarules
 
+import io.github.memo33.scdbpf
 import scala.language.implicitConversions
 
 /** Contains internal MetaRUL implementation (mostly); changes in this package

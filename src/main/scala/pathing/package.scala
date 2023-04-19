@@ -1,5 +1,7 @@
 package metarules
 
+import io.github.memo33.scdbpf
+
 package object pathing {
   import Bezier.Point
   import scala.language.implicitConversions

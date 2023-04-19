@@ -1,7 +1,7 @@
 package metarules.pathing
 
 import Bezier._
-import scdbpf.DbpfUtil.RotFlip._
+import io.github.memo33.scdbpf.DbpfUtil.RotFlip._
 
 object Trimming {
 
