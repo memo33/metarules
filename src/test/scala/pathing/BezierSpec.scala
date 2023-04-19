@@ -1,3 +1,4 @@
+package io.github.memo33
 package metarules.pathing
 
 import org.scalatest.wordspec.AnyWordSpec

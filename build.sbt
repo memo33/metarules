@@ -1,8 +1,8 @@
 name := "metarules"
 
-organization := "com.github.memo33"
+organization := "io.github.memo33"
 
-version := "0.5.1-SNAPSHOT"
+version := "0.6.0-SNAPSHOT"
 
 licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
 
@@ -13,15 +13,14 @@ scalacOptions ++= Seq(
   "-deprecation",
   "-feature",
   // "-opt-warnings:at-inline-failed-summary",
-  "-opt:l:inline",
-  // "-opt-inline-from:**",  // leads to compiler errors with scala-2.13
+  "-opt:l:inline", "-opt-inline-from:<sources>",
   "-encoding", "UTF-8",
   "-release:8")
 
 javacOptions ++= Seq("--release", "8")
 
 console / initialCommands := """
-import metarules._, metarules.meta._
+import io.github.memo33.metarules._, io.github.memo33.metarules.meta._
 import internal.DummyNetwork._, Implicits._, Flags._, RotFlip._, Rule.{CopyTile => %}, group.SymGroup._
 """
 

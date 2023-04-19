@@ -1,3 +1,4 @@
+package io.github.memo33
 package metarules.meta
 
 import RotFlip._
