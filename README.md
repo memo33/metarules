@@ -278,3 +278,6 @@ Bump the version number in `build.sbt`. Then run `sbt publishLocal` and upload t
 (If the version number ends in `-SNAPSHOT`, you can run `sbt publishLocal` locally without uploading anything,
 which is convenient if you make changes to the NAM repository at the same time.
 Once your changes are finalized, you can remove the `-SNAPSHOT` from the version tag.)
+
+The latest release is now on [Maven Central](https://mvnrepository.com/artifact/io.github.memo33/metarules).
+(See `sonatype.sbt` for instructions on how to publish to Maven Central.)
