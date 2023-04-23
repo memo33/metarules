@@ -1,6 +1,7 @@
+package io.github.memo33
 package metarules.pathing
 
-import scdbpf.DbpfUtil.{Dihedral, RotFlip}
+import io.github.memo33.scdbpf.DbpfUtil.{Dihedral, RotFlip}
 
 object Bezier {
 
@@ -100,7 +101,7 @@ object Bezier {
       * point is on the line.
       */
     def side(p: Point): Int = {
-      ((p2.x - p1.x) * (p.y - p1.y) - (p2.y - p1.y) * (p.x - p1.x)).signum
+      ((p2.x - p1.x) * (p.y - p1.y) - (p2.y - p1.y) * (p.x - p1.x)).sign.toInt
     }
     /** Returns true if points are on the same side of this line. Note: Points
       * must not be ''on'' the line.

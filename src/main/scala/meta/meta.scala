@@ -1,3 +1,4 @@
+package io.github.memo33
 package metarules.meta
 
 import RotFlip._
@@ -36,7 +37,7 @@ type IdResolver = PartialFunction[Tile, IdTile]
 
 case class Segment(network: Network, flags: Flags) {
   def * (rf: RotFlip): Segment = copy(flags = flags * rf)
-  override def toString: String = network + "~" + flags
+  override def toString: String = s"$network~$flags"
 
   def ~ (w: Int, n: Int, e: Int, s: Int): TupleSegment = TupleSegment(this, network~(w,n,e,s))
   def ~ (flags: (Int, Int, Int, Int)): TupleSegment = this ~ (flags._1, flags._2, flags._3, flags._4)
@@ -50,7 +51,7 @@ case class Segment(network: Network, flags: Flags) {
 }
 
 private[meta] case class TupleSegment(seg1: Segment, seg2: Segment) {
-  override def toString: String = seg1 + "~" + seg2.flags
+  override def toString: String = s"$seg1~${seg2.flags}"
 }
 
 private[meta] case class CoupleNetwork(network1: Network, network2: Network) {
@@ -211,24 +212,28 @@ package internal {  // <-- to avoid name conflicts
 }
 
 import scala.reflect.ClassTag
-import scala.collection.IndexedSeqOptimized
-import scala.collection.generic.CanBuildFrom
 import scala.collection.mutable.{Builder, ArrayBuilder}
+import scala.collection.immutable.ArraySeq
 
-class Rule[+A <: TileLike : ClassTag] private (ts: Array[A]) extends IndexedSeq[A] with IndexedSeqOptimized[A, Rule[A]] {
+class Rule[+A <: TileLike] private (private val ts: ArraySeq[A]) {
   def apply(i: Int): A = ts(i)
-  def length: Int = 4
-  override protected[this] def newBuilder = Rule.newBuilder[A]
-  override def canEqual(that: Any): Boolean = that.isInstanceOf[Rule[_]]
-  //override def stringPrefix: String = "Rule"
+  def map[B <: TileLike](f: A => B): Rule[B] = new Rule(ts.map(f))
+  def forall(p: A => Boolean): Boolean = ts.forall(p)
+  def exists(p: A => Boolean): Boolean = ts.exists(p)
+  def foreach[U](f: A => U): Unit = ts.foreach(f)
   override def toString: String = ts.mkString("Rule( ", " | ", " )")
+  override def equals(that: Any): Boolean = that match {
+    case that: Rule[_] => this.ts == that.ts
+    case _ => false
+  }
+  override def hashCode: Int = ts.hashCode
 }
 
 object Rule {
 
   case object CopyTile
 
-  def apply[A <: TileLike : ClassTag](a: A, b: A, c: A, d: A) = new Rule(Array(a, b, c, d))
+  def apply[A <: TileLike : ClassTag](a: A, b: A, c: A, d: A) = new Rule(ArraySeq(a, b, c, d))
 
   def apply(
     a: Int, ar: Byte, af: Byte,
@@ -242,7 +247,7 @@ object Rule {
   abstract class RuleBuilderLike[B <: TileLike : ClassTag, C] extends Builder[B, C] {
     private[Rule] var arr = new Array[B](4)
     private[this] var i = 0
-    def += (elem: B): this.type = {
+    def addOne(elem: B): this.type = {
       arr(i) = elem
       i += 1
       this
@@ -254,7 +259,7 @@ object Rule {
   }
 
   class RuleBuilder[B <: TileLike : ClassTag] private[Rule] () extends RuleBuilderLike[B, Rule[B]] {
-    def result(): Rule[B] = new Rule(arr)
+    def result(): Rule[B] = new Rule(arr.to(ArraySeq))
   }
 
   // A = Tile, B = TupleTile or A = SymTile, B = TupleSymTile
@@ -265,11 +270,6 @@ object Rule {
   }
 
   def newBuilder[B <: TileLike : ClassTag]: RuleBuilder[B] = new RuleBuilder()
-
-  implicit def cbf[B <: TileLike : ClassTag]: CanBuildFrom[Seq[_], B, Rule[B]] = new CanBuildFrom[Seq[_], B, Rule[B]] {
-    def apply(): Builder[B, Rule[B]] = newBuilder
-    def apply(from: Seq[_]): Builder[B, Rule[B]] = newBuilder
-  }
 
   private[meta] class PartialRule2[A <: TileLike : ClassTag, C] private[meta] (b: RuleBuilderLike[A, C]) {
     def | (tile: A): PartialRule3[A, C] = new PartialRule3(b += tile)

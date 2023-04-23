@@ -1,4 +1,7 @@
+package io.github.memo33
 package metarules
+
+import io.github.memo33.scdbpf
 
 package object pathing {
   import Bezier.Point

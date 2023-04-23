@@ -1,9 +1,11 @@
+package io.github.memo33
 package metarules.meta
 
-import org.scalatest.{WordSpec, Matchers}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import RotFlip._
 
-class GroupElementSpec extends WordSpec with Matchers {
+class GroupElementSpec extends AnyWordSpec with Matchers {
 
   "RotFlip/GroupElement" should {
     "have proper apply function" in {
@@ -73,7 +75,7 @@ class GroupElementSpec extends WordSpec with Matchers {
   }
 }
 
-class SymGroupSpec extends WordSpec with Matchers {
+class SymGroupSpec extends AnyWordSpec with Matchers {
   import group.SymGroup, SymGroup._
 
   "SymGroup" should {

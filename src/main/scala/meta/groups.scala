@@ -1,6 +1,8 @@
+package io.github.memo33
 package metarules.meta
 
 import scala.collection.immutable.SortedSet
+import io.github.memo33.scalaenum
 import RotFlip.GroupElement
 
 /** The eight rotations of a tile, e.g. in an override rule.
@@ -61,13 +63,13 @@ package group {
 
   sealed trait GSet extends SortedSet[GroupElement] { this: group.ValName =>
     protected val rep: RotFlip.ValueSet
-    override def stringPrefix = name
+    override def className = name
 
     def iterator: Iterator[GroupElement] = rep.iterator
-    def -(elem: GroupElement): SortedSet[GroupElement] = rep - elem
-    def +(elem: GroupElement): SortedSet[GroupElement] = rep + elem
+    def excl(elem: GroupElement): SortedSet[GroupElement] = rep - elem
+    def incl(elem: GroupElement): SortedSet[GroupElement] = rep + elem
     def contains(elem: GroupElement): Boolean = rep.contains(elem)
-    def keysIteratorFrom(start: GroupElement): Iterator[GroupElement] = rep.keysIteratorFrom(start)
+    def iteratorFrom(start: GroupElement): Iterator[GroupElement] = rep.iteratorFrom(start)
     implicit def ordering: Ordering[GroupElement] = rep.ordering
     def rangeImpl(from: Option[GroupElement],until: Option[GroupElement]): SortedSet[GroupElement] = rep.rangeImpl(from, until)
   }

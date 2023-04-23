@@ -1,3 +1,4 @@
+package io.github.memo33
 package metarules.meta
 
 import RotFlip._
@@ -35,7 +36,7 @@ object RuleTransducer {
 
   val LOGGER = java.util.logging.Logger.getLogger("networkaddonmod")
 
-  def apply(rule: Rule[SymTile])(implicit context: Context): TraversableOnce[Rule[IdTile]] = {
+  def apply(rule: Rule[SymTile])(implicit context: Context): Iterator[Rule[IdTile]] = {
     val input = context.preprocess(rule)
     val inputNonEmpty = input.nonEmpty
     val result = input.flatMap(rule => createRules(rule.map(_.toIdSymTile(context.resolve)), context.tileOrientationCache))
@@ -114,7 +115,7 @@ object RuleTransducer {
     */
   private[meta] def computeExtendedRepr(repr: Set[RotFlip], rhsOrientations: Iterable[RotFlip]): Set[RotFlip] = {
     val g0 = rhsOrientations.head
-    val gs = (RotFlip.ValueSet.newBuilder ++= rhsOrientations.tail).result
+    val gs = (RotFlip.ValueSet.newBuilder ++= rhsOrientations.tail).result()
     if (gs.isEmpty) {
       // this can happen when the other RHS had the ambiguity, so there is nothing to do
       repr
@@ -131,7 +132,7 @@ object RuleTransducer {
     }
   }
 
-  private[meta] def createRules(rule: Rule[IdSymTile], tileOrientationCache: collection.mutable.Map[Int, Set[RotFlip]]): TraversableOnce[Rule[IdTile]] = {
+  private[meta] def createRules(rule: Rule[IdSymTile], tileOrientationCache: collection.mutable.Map[Int, Set[RotFlip]]): Iterator[Rule[IdTile]] = {
     val a = rule(0); val b = rule(1); val c = rule(2); val d = rule(3)
     val aRepr = tileOrientationCache.getOrElse(a.id, a.repr)
     val bRepr = tileOrientationCache.getOrElse(b.id, b.repr)
@@ -143,9 +144,9 @@ object RuleTransducer {
 
     for {
       // TODO possibly, factor needs to be refined in case of equal IIDs
-      fac <- if (!a.symmetries.contains(R2F1) || !b.symmetries.contains(R2F1)) Seq(R0F0, R2F1) else Seq(R0F0)
-      as <- a.symmetries; ag = a.rf * as * fac
-      bs <- b.symmetries; bg = b.rf * bs * fac
+      fac <- if (!a.symmetries.contains(R2F1) || !b.symmetries.contains(R2F1)) Iterator(R0F0, R2F1) else Iterator(R0F0)
+      as <- a.symmetries.iterator; ag = a.rf * as * fac
+      bs <- b.symmetries.iterator; bg = b.rf * bs * fac
       if !hasSmallerEquivRepr(a.id, ag, b.id, bg)
       if isReachable(aRepr, ag, bRepr, bg)
       rhs = mappedRhs(fac, findRhsOrientation(ag/fac, a.symmetries, aRepr,

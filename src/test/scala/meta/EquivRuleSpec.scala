@@ -1,9 +1,11 @@
+package io.github.memo33
 package metarules.meta
 
-import org.scalatest.{WordSpec, Matchers}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import RotFlip._
 
-class EquivRuleSpec extends WordSpec with Matchers {
+class EquivRuleSpec extends AnyWordSpec with Matchers {
 
   "equals and hashcode" should {
     def wrap(id1: Int, rf1: RotFlip, id2: Int, rf2: RotFlip): EquivRule = {
@@ -68,10 +70,10 @@ class EquivRuleSpec extends WordSpec with Matchers {
       }
       // check that unequal rules are really unequal
       val equivRules = equivRotations.map(_.map { case (a,b) => wrapSame(a,b) })
-      val m1 = equivRules.groupBy(identity).mapValues(_.size)  // consists of 4s and 2s (weird cases)
+      val m1 = equivRules.groupBy(identity).view.mapValues(_.size).toMap  // consists of 4s and 2s (weird cases)
       equivRotations.map(_.toSet).distinct.map(_.size) shouldBe equivRules.distinct.map(m1)
       // check that unequal rules do not have hash collisions in this example
-      val m2 = equivRules.groupBy(_.hashCode).mapValues(_.size)
+      val m2 = equivRules.groupBy(_.hashCode).view.mapValues(_.size).toMap
       equivRotations.map(_.toSet).distinct.map(_.size) shouldBe equivRules.map(_.hashCode).distinct.map(m2)
     }
   }
