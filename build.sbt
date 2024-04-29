@@ -10,7 +10,7 @@ description := "A RUL2 meta language for SC4"
 
 licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
 
-scalaVersion := "2.13.10"
+scalaVersion := "2.13.13"
 
 scalacOptions ++= Seq(
   "-unchecked",
