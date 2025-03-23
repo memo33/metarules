@@ -38,7 +38,10 @@ object RuleTransducer {
 
   class ResolutionFailed(val tile: SymTile, val rule: Option[Rule[SymTile]], val reason: Throwable, val frame: Option[StackTraceElement]) extends Exception(
     s"ID resolution failed for tile `${tile}`"
-    + rule.map(r => f" of%n%n  $r%n").getOrElse("")
+    + rule.map { r =>
+      val rPadded: String = (0 to 3).find(i => r(i) == tile).map(i => r.toStringUnderlined(i, pad=2)).getOrElse(s"  $r")
+      f" of rule%n%n$rPadded%n"
+    }.getOrElse("")
     + frame.map(f => f"%nThe rule was generated at ${f.getFileName}:${f.getLineNumber}. Either the rule does not make sense, or an ID for the tile needs to be defined in the resolver.%n").getOrElse(""),
     reason
   )

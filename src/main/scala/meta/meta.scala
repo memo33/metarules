@@ -223,6 +223,12 @@ class Rule[+A <: TileLike] private (private val ts: ArraySeq[A]) {
   def foreach[U](f: A => U): Unit = ts.foreach(f)
   override def toString: String =
     s"""Rule( ${ts(0)} | ${ts(1)} | ${if (ts(2) == ts(0)) "%" else ts(2)} | ${if (ts(3) == ts(1)) "%" else ts(3)} )"""
+  /** Underline tile `i` of this rule with `^^^^`. */
+  def toStringUnderlined(i: Int, pad: Int): String = {
+    val chunks: Seq[String] = (0 to 3).map(j => if (j >= 2 && ts(j) == ts(j-2)) "%" else ts(j).toString)
+    chunks.mkString(" " * pad, " | ", f"%n" + " " * (pad + chunks.take(i).map(_.length + 3).sum) + "^" * chunks(i).length)
+  }
+  /** Convert an `IdTile` rule to the format used in RUL2. */
   def toRul2String(implicit ev: A <:< IdTile): String = s"${ts(0)},${ts(1)}=${ts(2)},${ts(3)}"
   override def equals(that: Any): Boolean = that match {
     case that: Rule[_] => this.ts == that.ts
