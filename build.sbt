@@ -2,7 +2,7 @@ name := "metarules"
 
 organization := "io.github.memo33"
 
-version := "0.6.0"
+version := "0.6.1-SNAPSHOT"
 
 ThisBuild / versionScheme := Some("early-semver")
 
@@ -10,7 +10,7 @@ description := "A RUL2 meta language for SC4"
 
 licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
 
-scalaVersion := "2.13.13"
+scalaVersion := "2.13.16"
 
 scalacOptions ++= Seq(
   "-unchecked",
