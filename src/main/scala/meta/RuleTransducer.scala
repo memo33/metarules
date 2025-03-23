@@ -36,10 +36,22 @@ object RuleTransducer {
 
   val LOGGER = java.util.logging.Logger.getLogger("networkaddonmod")
 
+  class ResolutionFailed(val tile: SymTile, val rule: Option[Rule[SymTile]], val reason: Throwable, val frame: Option[StackTraceElement]) extends Exception(
+    s"ID resolution failed for tile `${tile}`"
+    + rule.map(r => f" of%n%n  $r%n").getOrElse("")
+    + frame.map(f => f"%nThe rule was generated at ${f.getFileName}:${f.getLineNumber}. Either the rule does not make sense, or an ID for the tile needs to be defined in the resolver.%n").getOrElse(""),
+    reason
+  )
+
   def apply(rule: Rule[SymTile])(implicit context: Context): Iterator[Rule[IdTile]] = {
     val input = context.preprocess(rule)
     val inputNonEmpty = input.nonEmpty
-    val result = input.flatMap(rule => createRules(rule.map(_.toIdSymTile(context.resolve)), context.tileOrientationCache))
+    val result = input.flatMap(rule => createRules(
+      rule.map(tile => try tile.toIdSymTile(context.resolve) catch {
+        case scala.util.control.NonFatal(e) => throw new ResolutionFailed(tile, Some(rule), e, frame = None)
+      }),
+      context.tileOrientationCache,
+    ))
     if (result.isEmpty && inputNonEmpty) {
       LOGGER.warning(s"did not produce any rules for: $rule")
     }

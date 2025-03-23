@@ -3,6 +3,7 @@ package metarules.meta
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.OptionValues._
 
 class RuleGeneratorSpec extends AnyWordSpec with Matchers {
 
@@ -56,6 +57,23 @@ class RuleGeneratorSpec extends AnyWordSpec with Matchers {
         Rule(0x57100000,3,0,0xFF000300,2,0,0x57100000,3,0,0xFF000400,2,0),
         Rule(0xFF000500,1,0,0x57100000,1,0,0xFF000600,1,0,0x57100000,1,0),
         Rule(0xFF000500,3,0,0x57100000,3,0,0xFF000600,3,0,0x57100000,3,0))
+    }
+
+    "should find defining location of rule if ID resolution fails" in {
+      import internal.DummyNetwork._, RotFlip._, Flags._, Implicits._, group.SymGroup._
+      val resolve = Map.empty[Tile, IdTile]
+      class DummyGenerator extends RuleGenerator {
+        var context = RuleTransducer.Context(resolve)
+        def start(): Unit = {
+          Rules += Mis~WE | (Dirtroad ~> Mis)~WE  // <-- exception is thrown here
+          createRules()
+        }
+      }
+      val generator = new DummyGenerator
+      val thrown = intercept[RuleTransducer.ResolutionFailed]{ generator.start() }
+      thrown.frame.value.getFileName shouldBe "ruleGeneratorSpec.scala"
+      thrown.frame.value.getMethodName shouldBe "start"
+      thrown.frame.value.getClassName should include("DummyGenerator")
     }
   }
 }
