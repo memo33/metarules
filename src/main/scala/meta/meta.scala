@@ -221,7 +221,9 @@ class Rule[+A <: TileLike] private (private val ts: ArraySeq[A]) {
   def forall(p: A => Boolean): Boolean = ts.forall(p)
   def exists(p: A => Boolean): Boolean = ts.exists(p)
   def foreach[U](f: A => U): Unit = ts.foreach(f)
-  override def toString: String = ts.mkString("Rule( ", " | ", " )")
+  override def toString: String =
+    s"""Rule( ${ts(0)} | ${ts(1)} | ${if (ts(2) == ts(0)) "%" else ts(2)} | ${if (ts(3) == ts(1)) "%" else ts(3)} )"""
+  def toRul2String(implicit ev: A <:< IdTile): String = s"${ts(0)},${ts(1)}=${ts(2)},${ts(3)}"
   override def equals(that: Any): Boolean = that match {
     case that: Rule[_] => this.ts == that.ts
     case _ => false
