@@ -2,7 +2,7 @@ name := "metarules"
 
 organization := "io.github.memo33"
 
-version := "0.6.1"
+version := "0.6.2-SNAPSHOT"
 
 ThisBuild / versionScheme := Some("early-semver")
 
@@ -31,6 +31,8 @@ import internal.DummyNetwork._, Implicits._, Flags._, RotFlip._, Rule.{CopyTile 
 publishTo := sonatypePublishToBundle.value
 
 ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
+
+useGpgPinentry := true  // see https://github.com/sbt/sbt-pgp/issues/178 or https://github.com/microsoft/WSL/issues/4029#issuecomment-491547314
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.15" % "test"
 
