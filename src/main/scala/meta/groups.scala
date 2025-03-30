@@ -87,7 +87,7 @@ package group {
     type Value = Quotient
 
     private def Val(r: Seq[Tuple2[Int, Int]]) =
-      new Quotient(RotFlip.ValueSet(r.map(tup => RotFlip(tup._1, tup._2)): _*))
+      new Quotient(RotFlip.ValueSet(r.map(tup => RotFlip(tup._1, tup._2))*))
 
     val Cyc1  = Val(Seq((0,0)))
     val Cyc2A = Val(Seq((0,0), (1,0)))
@@ -102,7 +102,7 @@ package group {
       extends SymGroup.Val with ValName with GSet {
     import SymGroup._
 
-    def sub(that: SymGroup): Boolean = this forall (that contains _)
+    infix def sub(that: SymGroup): Boolean = this.forall(that.contains(_))
 
     def * (g: GroupElement): SymGroup = {
       if (this < Cyc2B || this > Cyc2E) this
@@ -135,7 +135,7 @@ package group {
     type Value = SymGroup
 
     private def Val(r: Seq[Tuple2[Int, Int]], q: Quotient) =
-      new SymGroup(RotFlip.ValueSet(r.map(tup => RotFlip(tup._1, tup._2)): _*), q)
+      new SymGroup(RotFlip.ValueSet(r.map(tup => RotFlip(tup._1, tup._2))*), q)
 
     val Cyc1  = Val(Seq((0,0)), Quotient.Dih4)
     val Cyc2A = Val(Seq((0,0), (2,0)), Quotient.Dih2)

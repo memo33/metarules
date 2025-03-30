@@ -13,7 +13,7 @@ object Bezier {
     def * (f: Dec): Point = Point(x * f, y * f, z * f)
     def + (that: Point): Point = Point(x + that.x, y + that.y, z + that.z)
     def - (that: Point): Point = Point(x - that.x, y - that.y, z - that.z)
-    def dot(that: Point): Dec = x * that.x + y * that.y + z * that.z
+    infix def dot(that: Point): Dec = x * that.x + y * that.y + z * that.z
     def normSquare: Dec = this dot this
     def norm: Double = Math.sqrt(normSquare)
 //    def normalize: Point = {
@@ -32,14 +32,14 @@ object Bezier {
     def build(from: Point, x: Dec, y: Dec) = Point(x, y, from.z)
   }
 
-  def cubicCurve(p0: Point, p1: Point, p2: Point, p3: Point): Curve = { t: Dec =>
+  def cubicCurve(p0: Point, p1: Point, p2: Point, p3: Point): Curve = { (t: Dec) =>
     p0 * ((1-t) * (1-t) * (1-t)) +
     p1 * (3 * t * (1-t) * (1-t)) +
     p2 * (3 * t * t * (1 - t)) +
     p3 * (t * t * t)
   }
 
-  def quadraticCurve(p0: Point, p1: Point, p2: Point): Curve = { t: Dec =>
+  def quadraticCurve(p0: Point, p1: Point, p2: Point): Curve = { (t: Dec) =>
     p0 * ((1-t) * (1-t)) +
     p1 * (2 * t * (1-t)) +
     p2 * (t * t)
@@ -74,7 +74,7 @@ object Bezier {
       } else {
         val t1 = (t0 + t2) / 2
         val p1 = curve(t1)
-        val angle = (p1 - p0) angle (p2 - p1)
+        val angle = (p1 - p0).angle(p2 - p1)
         if (angle < maxAngle) {
           Seq(p1)
         } else {
@@ -89,7 +89,7 @@ object Bezier {
 
   case class Line(p1: Point, p2: Point) {
     def * (rf: RotFlip): Line = Line(p1 *: rf, p2 *: rf)
-    def intersect(that: Line): Point = {
+    infix def intersect(that: Line): Point = {
       val Line(p3, p4) = that
       val denom = (p1.x - p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x - p4.x)
       require(denom.abs > Threshold, "lines must not be parallel")

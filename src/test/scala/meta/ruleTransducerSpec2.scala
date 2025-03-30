@@ -165,7 +165,7 @@ class RuleTransduceSpec2 extends AnyWordSpec with Matchers {
         val l1 = Seq(ag, ag * R2F1, bg * R0F1, bg * R2F0)
         val l2 = Seq(bg, bg * R2F1, ag * R0F1, ag * R2F0)
         withClue(s"$ag $bg:") {
-          (l1 zip l2).toSet map { tup: Tuple2[GroupElement, GroupElement] =>
+          (l1 zip l2).toSet map { (tup: Tuple2[GroupElement, GroupElement]) =>
             !hasSmallerEquivRepr(42, tup._1, 42, tup._2)
           } count (_ == true) should be (1)
         }

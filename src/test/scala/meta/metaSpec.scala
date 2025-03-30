@@ -175,9 +175,9 @@ class metaSpec extends AnyWordSpec with Matchers {
     "respect symmerties upon rotation" in {
       import RotFlip._, group.SymGroup._, internal.DummyNetwork._
       val it = IdTile(0x12345678, R1F0, Cyc2B)
-      (it * R1F0).symmetries shouldBe Cyc2D
-      (it * R2F0).symmetries shouldBe Cyc2B
-      (it * R1F0).rf shouldBe R2F0
+      (it * R1F0).symmetries.shouldBe(Cyc2D)
+      (it * R2F0).symmetries.shouldBe(Cyc2B)
+      (it * R1F0).rf.shouldBe(R2F0)
     }
   }
 }

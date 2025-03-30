@@ -168,7 +168,7 @@ private[meta] class IdSymTile(val symmetries: SymGroup, idTile: IdTile) extends 
   def repr: Set[RotFlip] = idTile.mappedRepr(symmetries.quotient)
   override def toString = s"$idTile[${symmetries.name}]"
 
-  def * (rf: RotFlip) = new IdSymTile(symmetries * rf, idTile * rf)
+  def * (rf: RotFlip): IdSymTile = new IdSymTile(symmetries * rf, idTile * rf)
 
   def | (that: Tile): Rule.PartialRule2[SymTile, Rule[SymTile]] = {
     new Rule.PartialRule2(Rule.newBuilder[SymTile] += this += that)
@@ -201,7 +201,7 @@ package internal {  // <-- to avoid name conflicts
   /** Constructors are provided by Syntax#IdTile object. */
   case class IdTile(id: Int, rf: RotFlip, mappedRepr: Quotient => Set[RotFlip] = identity) extends TileLike {
     override def toString = f"0x$id%08X,${rf.rot},${rf.flip}"
-    def * (rf: RotFlip) = copy(rf = this.rf * rf)
+    def * (rf: RotFlip): IdTile = copy(rf = this.rf * rf)
 
     override def equals(any: Any): Boolean = any match {
       case IdTile(id, rf, mr) => id == this.id && rf == this.rf
@@ -217,10 +217,10 @@ import scala.collection.immutable.ArraySeq
 
 class Rule[+A <: TileLike] private (private val ts: ArraySeq[A]) {
   def apply(i: Int): A = ts(i)
-  def map[B <: TileLike](f: A => B): Rule[B] = new Rule(ts.map(f))
-  def forall(p: A => Boolean): Boolean = ts.forall(p)
-  def exists(p: A => Boolean): Boolean = ts.exists(p)
-  def foreach[U](f: A => U): Unit = ts.foreach(f)
+  infix def map[B <: TileLike](f: A => B): Rule[B] = new Rule(ts.map(f))
+  infix def forall(p: A => Boolean): Boolean = ts.forall(p)
+  infix def exists(p: A => Boolean): Boolean = ts.exists(p)
+  infix def foreach[U](f: A => U): Unit = ts.foreach(f)
   override def toString: String =
     s"""Rule( ${ts(0)} | ${ts(1)} | ${if (ts(2) == ts(0)) "%" else ts(2)} | ${if (ts(3) == ts(1)) "%" else ts(3)} )"""
   /** Underline tile `i` of this rule with `^^^^`. */
