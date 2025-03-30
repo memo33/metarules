@@ -43,7 +43,7 @@ final class EquivRule(val rule: Rule[IdTile]) {
     }
   }
 
-  @inline private[this] def idHash(a: Int, b: Int, c: Int): Int = {
+  @inline private def idHash(a: Int, b: Int, c: Int): Int = {
     // most ID information lies in bits 7-23 (17 bits), so prime should have
     // at least 32-17 = 15 bits so as to shift much of the information around
     val prime = 66403
@@ -55,7 +55,7 @@ final class EquivRule(val rule: Rule[IdTile]) {
 
 private object EquivRule {
 
-  private[this] def smallest(a: RotFlip, b: RotFlip): (Int, Boolean) = {
+  private def smallest(a: RotFlip, b: RotFlip): (Int, Boolean) = {
     val (a2, b2, swapped) = Seq(
       (a, b, false),
       (a * R2F1, b * R2F1, false),
@@ -64,9 +64,9 @@ private object EquivRule {
     (a2.id * 8 + b2.id, swapped)
   }
 
-  private[this] val rfHashArray = Array.tabulate[Int](8, 8) { case (i, j) => smallest(RotFlip(i), RotFlip(j))._1 }
-  private[this] val swappedArray = Array.tabulate[Boolean](8, 8) { case (i, j) => smallest(RotFlip(i), RotFlip(j))._2 }
-  private[this] val equivClassSize = {
+  private val rfHashArray = Array.tabulate[Int](8, 8) { case (i, j) => smallest(RotFlip(i), RotFlip(j))._1 }
+  private val swappedArray = Array.tabulate[Boolean](8, 8) { case (i, j) => smallest(RotFlip(i), RotFlip(j))._2 }
+  private val equivClassSize = {
     val classes = rfHashArray.flatten.groupBy(identity)
     Array.tabulate[Int](32)(i => classes.getOrElse(i, Array.emptyIntArray).size)
   }

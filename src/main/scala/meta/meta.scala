@@ -254,7 +254,7 @@ object Rule {
 
   abstract class RuleBuilderLike[B <: TileLike : ClassTag, C] extends Builder[B, C] {
     private[Rule] var arr = new Array[B](4)
-    private[this] var i = 0
+    private var i = 0
     def addOne(elem: B): this.type = {
       arr(i) = elem
       i += 1

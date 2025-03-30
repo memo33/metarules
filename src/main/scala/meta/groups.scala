@@ -49,7 +49,7 @@ object RotFlip extends scalaenum.Enum { // was previously called GroupElement
   val R2F1 = new RotFlip(2,1)
   val R1F1 = new RotFlip(1,1)
 
-  private[this] val elems = Array(R0F0, R1F0, R2F0, R3F0, R0F1, R1F1, R2F1, R3F1) // sic! different order to simplify 'withRotFlip'
+  private val elems = Array(R0F0, R1F0, R2F0, R3F0, R0F1, R1F1, R2F1, R3F1) // sic! different order to simplify 'withRotFlip'
 
   private def withRotFlip(rot: Int, flip: Int): GroupElement = elems(rot + flip * 4)
 
@@ -156,7 +156,7 @@ package group {
     def ofTile(tile: Syntax#Tile): SymGroup =
       ofImpl(rf => tile.segs == tile.segs.map(_ * rf))
 
-    private[this] def ofImpl(has: RotFlip => Boolean): SymGroup = {
+    private def ofImpl(has: RotFlip => Boolean): SymGroup = {
       if (has(R2F0)) {
         if (has(R1F0)) {
           if (has(R0F1)) Dih4
