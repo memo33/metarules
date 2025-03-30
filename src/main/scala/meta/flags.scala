@@ -12,8 +12,8 @@ import Flag._
   */
 object Flag {
 
-  object Kind extends Enumeration {
-    val Default, LeftSpin, RightSpin = Value
+  enum Kind {
+    case Default, LeftSpin, RightSpin
   }
 
   sealed trait FlagManifest {
@@ -22,6 +22,7 @@ object Flag {
     def flip(flag: Int): Int
     def reverse(flag: Int): Int
     protected def suffix: String = ""
+    def kind: Kind = Kind.Default
   }
   sealed trait BiManifest extends FlagManifest {
     def stringify(flag: Int) = if (flag == 0) "0" else flag.toString + suffix
@@ -48,10 +49,10 @@ object Flag {
 
   object Bi extends BiManifest
   object InOut extends InOutManifest
-  object LeftSpinBi     extends BiManifest    { override def suffix = "L" }
-  object LeftSpinInOut  extends InOutManifest { override def suffix = "L" }
-  object RightSpinBi    extends BiManifest    { override def suffix = "R" }
-  object RightSpinInOut extends InOutManifest { override def suffix = "R" }
+  object LeftSpinBi     extends BiManifest    { override def suffix = "L"; override def kind: Kind = Kind.LeftSpin }
+  object LeftSpinInOut  extends InOutManifest { override def suffix = "L"; override def kind: Kind = Kind.LeftSpin }
+  object RightSpinBi    extends BiManifest    { override def suffix = "R"; override def kind: Kind = Kind.RightSpin }
+  object RightSpinInOut extends InOutManifest { override def suffix = "R"; override def kind: Kind = Kind.RightSpin }
 }
 
 /** An implementation of `IndexedSeq[Int]` that is limited to length 4.
