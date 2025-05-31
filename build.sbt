@@ -2,7 +2,7 @@ name := "metarules"
 
 organization := "io.github.memo33"
 
-version := "0.7.0"
+version := "0.7.1-SNAPSHOT"
 
 ThisBuild / versionScheme := Some("early-semver")
 

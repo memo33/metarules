@@ -49,9 +49,9 @@ object Bezier {
     * suitable control points. This function determines the shape of the curve,
     * i.e. its smoothness.
     */
-  def curveFromTriangle(p0: Point, p12: Point, p3: Point): Curve = {
-    val a = 0.5f // larger values are nearer to p12
-    val b = 0.5f // smaller values are nearer to p12
+  def curveFromTriangle(p0: Point, p12: Point, p3: Point, a: Float, b: Float): Curve = {
+    // val a = 0.5f // larger values are nearer to p12
+    // val b = 0.5f // smaller values are nearer to p12
     // TODO consider using the angle as heuristic
     def guess(p0: Point, p12: Point, p3: Point): Point = {
       val dist = (p3 * b + p12 * (1 - b) - p0).norm

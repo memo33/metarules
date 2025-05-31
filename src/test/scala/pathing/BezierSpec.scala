@@ -14,7 +14,7 @@ class BezierTest extends AnyWordSpec with Matchers {
   val p1 = Point(2,2,0)
   "Bezier" should {
     "create nice 90 curve" in {
-      val curve = curveFromTriangle(p0, p1, p2)
+      val curve = curveFromTriangle(p0, p1, p2, 0.5f, 0.5f)
       val minDist = 0.25
       val maxAngle = 0.14 // about 8 degree
       val points = segmentCurve(minDist, maxAngle, curve)

@@ -26,6 +26,10 @@ abstract class Intersection {
 
   val MinDist = 0.5 // half a meter
   val MaxAngle = 0.11 // about 6.3 degree
+  val MaxRatio = 1.33 // bounds the curve to avoid very asymmetrical curves
+  val MaxRadius = 6.0  // in meters, bounds the curve to avoid very large curves (in particular, turn paths for triple-tile medians should stay within same tile)
+  val shapeFactorA = 0.5f // larger values are nearer to middle point (pointier curve)
+  val shapeFactorB = 0.5f // smaller values are nearer to middle point (pointier curve)
 
   def yieldConnections(tt: TT): IterableOnce[Connection]
 
@@ -40,7 +44,19 @@ abstract class Intersection {
     if (middle == curveStart || middle == curveEnd || curveStart == curveEnd) {
       Seq(start, middle, end)
     } else {
-      val curve = curveFromTriangle(curveStart, l1 intersect l2, curveEnd)
+      def moveToMiddle(p: Point, bound: Double): Point = {
+        val dist = (p - middle).norm
+        if (dist <= bound) p
+        else middle + (p - middle) * (bound / dist).toFloat
+      }
+      val phi = Math.abs((middle - curveStart).angle(curveEnd - middle))
+      var a = moveToMiddle(curveStart, bound = MaxRadius * Math.tan(phi / 2))  // crude approximation for "radius"
+      var b = moveToMiddle(curveEnd, bound = MaxRadius * Math.tan(phi / 2))
+      val dist1 = (a - middle).norm
+      val dist2 = (b - middle).norm
+      a = moveToMiddle(a, bound = dist2 * MaxRatio)
+      b = moveToMiddle(b, bound = dist1 * MaxRatio)
+      val curve = curveFromTriangle(a, middle, b, shapeFactorA, shapeFactorB)
       val ps = segmentCurve(MinDist, MaxAngle, curve)
       start +: ps :+ end
     }
