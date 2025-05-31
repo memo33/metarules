@@ -68,7 +68,7 @@ class RuleTransduceSpec2 extends AnyWordSpec with Matchers {
     }
 
     "detect ambiguities and take them into account in subsequent metarules" in {
-      val context = RuleTransducer.Context(resolver, collection.mutable.Map.empty[Int, Set[RotFlip]])
+      val context = RuleTransducer.Context(resolver)
       /* Initially, the possible absolute rotations of this tile are just these two.
        */
       (L2Rhw2~EW & L1Rhw2~NS).toIdSymTile(resolver).repr shouldBe (R0F0+R1F0)
@@ -101,7 +101,9 @@ class RuleTransduceSpec2 extends AnyWordSpec with Matchers {
         Rule(0x57201D00,3,0,0x57101A00,2,0,0x57201D00,3,0,0x57201A10,1,0))
       /* Therefore, we store the information that the tile can have additional rotations.
        */
-      context.tileOrientationCache shouldBe Map(0x57201A10 -> (R0F0+R1F0+R2F0+R3F0))
+      context.tileOrientationCache.accum shouldBe Map(0x57201A10 -> (R0F0+R1F0+R2F0+R3F0))
+
+      context.tileOrientationCache.cache ++= context.tileOrientationCache.accum  // manually propagate accumulated orientations for use in subsequent rules
       /* And subsequently we take the additional rotations into account in all other metarules,
        * so the following metarule now produces four lines of RUL2 (instead of two).
        */
@@ -112,15 +114,15 @@ class RuleTransduceSpec2 extends AnyWordSpec with Matchers {
         Rule(0x57201A10,3,0,0x57000000,3,0,0x57201A10,3,0,0x57200000,3,0))
       /* The second run should not change the cached orientations anymore.
        */
-      context.tileOrientationCache shouldBe Map(0x57201A10 -> (R0F0+R1F0+R2F0+R3F0))
+      context.tileOrientationCache.accum shouldBe Map(0x57201A10 -> (R0F0+R1F0+R2F0+R3F0))
       RuleTransducer(L2Rhw2~EW & Rhw4~NS | (Dirtroad~>L2Rhw2)~EW & L1Rhw2~NS)(context).toSeq shouldBe Seq(
         Rule(0x57201D00,3,0,0x57101A00,0,0,0x57201D00,3,0,0x57201A10,3,0),
         Rule(0x57201D00,3,0,0x57101A00,2,0,0x57201D00,3,0,0x57201A10,1,0))
-      context.tileOrientationCache shouldBe Map(0x57201A10 -> (R0F0+R1F0+R2F0+R3F0))
+      context.tileOrientationCache.accum shouldBe Map(0x57201A10 -> (R0F0+R1F0+R2F0+R3F0))
     }
 
     "detect ambiguities of tiles involving mirrorings" in {
-      val context = RuleTransducer.Context(resolver, collection.mutable.Map.empty[Int, Set[RotFlip]])
+      val context = RuleTransducer.Context(resolver)
       (Ave6m~ES & Ave6m~NE).toIdSymTile(resolver).repr shouldBe (R0F0+R1F0+R2F0+R3F0)
       /* Originally, we just get one line of RUL2.
        */
@@ -131,7 +133,9 @@ class RuleTransduceSpec2 extends AnyWordSpec with Matchers {
        */
       RuleTransducer(Ave6m~ES & (Road~>Ave6m)~NE | (Road~>Ave6m)~NW & Ave6m~WS)(context).toSeq shouldBe Seq(
         Rule(0x51218180,3,0,0x51218180,3,1,0x51219E8E,1,1,0x51219E8E,3,1))
-      context.tileOrientationCache shouldBe Map(0x51219E8E -> (R0F0+R1F0+R2F0+R3F0+R0F1+R3F1+R2F1+R1F1))
+      context.tileOrientationCache.accum shouldBe Map(0x51219E8E -> (R0F0+R1F0+R2F0+R3F0+R0F1+R3F1+R2F1+R1F1))
+
+      context.tileOrientationCache.cache ++= context.tileOrientationCache.accum  // manually propagate accumulated orientations for use in subsequent rules
       /* Hence subsequently the possibility of flipped absolute rotations
        * results in more lines of RUL2.
        */
@@ -251,7 +255,7 @@ class RuleTransduceSpec2 extends AnyWordSpec with Matchers {
 
     "generate correct number of rules" in {
       for ((a, b, x) <- s) {
-        val rules = createRules(Rule(a,b,c,d), context.tileOrientationCache).to(Iterable)
+        val rules = createRules(Rule(a,b,c,d), context.tileOrientationCache.cache, context.tileOrientationCache.accum).to(Iterable)
         withClue(s"${a.symmetries} ${b.symmetries}\n${rules.mkString("\n")}") {
           rules should have size (x)
         }

@@ -53,7 +53,8 @@ object RuleTransducer {
       rule.map(tile => try tile.toIdSymTile(context.resolve) catch {
         case scala.util.control.NonFatal(e) => throw new ResolutionFailed(tile, Some(rule), e, frame = None)
       }),
-      context.tileOrientationCache,
+      context.tileOrientationCache.cache,
+      context.tileOrientationCache.accum,
     ))
     if (result.isEmpty && inputNonEmpty) {
       LOGGER.warning(s"did not produce any rules for: $rule")
@@ -139,15 +140,25 @@ object RuleTransducer {
     }
   }
 
-  private[meta] def addExtendedReprToCache(id: Int, repr: Set[RotFlip], rhsOrientations: Iterable[RotFlip], tileOrientationCache: collection.mutable.Map[Int, Set[RotFlip]]): Unit = {
-    val repr1 = tileOrientationCache.getOrElse(id, repr)
+  private[meta] def accumulateExtendedRepr(
+    id: Int,
+    repr: Set[RotFlip],
+    rhsOrientations: Iterable[RotFlip],
+    tileOrientationCache: collection.Map[Int, Set[RotFlip]],
+    tileOrientationCacheAccum: collection.mutable.Map[Int, Set[RotFlip]],
+  ): Unit = {
+    val repr1 = tileOrientationCacheAccum.getOrElse(id, tileOrientationCache.getOrElse(id, repr))
     val repr2 = computeExtendedRepr(repr1, rhsOrientations)
     if (repr2 != repr1) {
-      tileOrientationCache(id) = repr2
+      tileOrientationCacheAccum(id) = repr2
     }
   }
 
-  private[meta] def createRules(rule: Rule[IdSymTile], tileOrientationCache: collection.mutable.Map[Int, Set[RotFlip]]): Iterator[Rule[IdTile]] = {
+  private[meta] def createRules(
+    rule: Rule[IdSymTile],
+    tileOrientationCache: collection.Map[Int, Set[RotFlip]],
+    tileOrientationCacheAccum: collection.mutable.Map[Int, Set[RotFlip]],
+  ): Iterator[Rule[IdTile]] = {
     val a = rule(0); val b = rule(1); val c = rule(2); val d = rule(3)
     val aRepr = tileOrientationCache.getOrElse(a.id, a.repr)
     val bRepr = tileOrientationCache.getOrElse(b.id, b.repr)
@@ -184,8 +195,8 @@ object RuleTransducer {
         // As this only affects subsequent metarules, this requires two global
         // runs of the entire metarule compilation process to produce consistent
         // results.
-        addExtendedReprToCache(c.id, cRepr, rhs.map(_._1), tileOrientationCache)
-        addExtendedReprToCache(d.id, dRepr, rhs.map(_._2), tileOrientationCache)
+        accumulateExtendedRepr(c.id, cRepr, rhs.map(_._1), tileOrientationCache, tileOrientationCacheAccum)
+        accumulateExtendedRepr(d.id, dRepr, rhs.map(_._2), tileOrientationCache, tileOrientationCacheAccum)
       }
       val (cg, dg) = resolveAmbiguousRhsOrientations(ag, bg, rhs)
 
@@ -216,10 +227,32 @@ object RuleTransducer {
 
   val defaultPreprocessor: Rule[SymTile] => Iterator[Rule[SymTile]] = rule => Iterator(rule)
 
+  class TileOrientationCache(
+    val cache: collection.mutable.Map[Int, Set[RotFlip]],
+    val accum: collection.mutable.Map[Int, Set[RotFlip]],
+  )
+
   case class Context(
+    /** The ID resolver. */
     resolve: Tile => IdTile,
-    tileOrientationCache: collection.mutable.Map[Int, Set[RotFlip]] = collection.mutable.Map.empty,
-    preprocess: Rule[SymTile] => Iterator[Rule[SymTile]] = defaultPreprocessor)
+    /** A mapping of IDs to non-standard orientations. This is used to overwrite
+      * the default orientations that are derived from tile symmetries alone.
+      * Sometimes, there is a need for additional non-standard orientations due
+      * to some side-effects of other rules. For example, some tiles would be
+      * represented by (0,0) and (1,0) only, by default, but in conjunction with
+      * some other rules, it can be necessary to represent them by (0,0), (1,0),
+      * (2,0) and (3,0). Usually this happens when a rule overwrites a tile with
+      * few symmetries by a tile with more symmetries, which can lead to
+      * ambiguities.
+      * These non-standard orientations can be detected automatically by the
+      * rule transducer and are accumulated in `tileOrientationCache.accum`.
+      * Add them to the `tileOrientationCache.cache` so that the transducer takes
+      * them into account when creating new rules.
+      */
+    tileOrientationCache: TileOrientationCache = TileOrientationCache(collection.mutable.Map.empty, collection.mutable.Map.empty),
+    /** A preprocessor that allows to perform some remapping on the input rules before resolving or transducing. */
+    preprocess: Rule[SymTile] => Iterator[Rule[SymTile]] = defaultPreprocessor,
+  )
 }
 
 } // end of RuleTransducerSyntax

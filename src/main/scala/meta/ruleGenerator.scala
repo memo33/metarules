@@ -35,7 +35,8 @@ trait RuleGenerator {
     * For correct functionality, it is important to overwrite this by a map that
     * is common between all rule generators (globally).
     *
-    * It also implements handling of mirror variants.
+    * It also implements a means of preprocessing the input rules, e.g. for
+    * dealing with mirror variants.
     */
   var context: RuleTransducer.Context
 
