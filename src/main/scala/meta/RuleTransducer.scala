@@ -42,9 +42,29 @@ object RuleTransducer {
       val rPadded: String = (0 to 3).find(i => r(i) == tile).map(i => r.toStringUnderlined(i, pad=2)).getOrElse(s"  $r")
       f" of rule%n%n$rPadded%n"
     }.getOrElse("")
-    + frame.map(f => f"%nThe rule was generated at ${f.getFileName}:${f.getLineNumber}. Either the rule does not make sense, or an ID for the tile needs to be defined in the resolver.%n").getOrElse(""),
+    + frame.map(f => f"%nThe rule was generated at ${f.getFileName}:${f.getLineNumber}. Either the rule does not make sense, or an ID for the tile needs to be defined in the resolver.%n").getOrElse("")
+    + ResolutionFailed.resolverNamesMessage(reason),
     reason
   )
+  object ResolutionFailed {
+    def collectResolverNamesFromTrace(reason: Throwable): Seq[String] = {
+      Iterator.iterate(reason)(e => Option(e.getCause).filter(_ ne e).orNull)
+        .takeWhile(_ != null).take(10)
+        .flatMap { e =>
+          e.getStackTrace.filter { frame =>
+            frame.getClassName.toLowerCase(java.util.Locale.ENGLISH).contains("resolver")
+            || frame.getFileName.toLowerCase(java.util.Locale.ENGLISH).contains("resolver")
+          }
+          .map(_.getClassName)
+        }
+        .toSeq.reverse.distinct
+    }
+    def resolverNamesMessage(reason: Throwable): String = {
+      val names = collectResolverNamesFromTrace(reason)
+      if (names.isEmpty) ""
+      else f"""%nResolvers in use: ${names.mkString(", ")}.%n"""
+    }
+  }
 
   def apply(rule: Rule[SymTile])(implicit context: Context): Iterator[Rule[IdTile]] = {
     val input = context.preprocess(rule)
