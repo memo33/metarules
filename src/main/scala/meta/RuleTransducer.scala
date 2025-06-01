@@ -59,7 +59,7 @@ object RuleTransducer {
     if (result.isEmpty && inputNonEmpty) {
       LOGGER.warning(s"did not produce any rules for: $rule")
     }
-    result
+    result.distinct
   }
 
   /** Tests whether the orientation of the two tiles can occur according to
